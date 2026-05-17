@@ -1,8 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=DM+Sans:ital,wght@0,400..800;1,400..800&family=Space+Grotesk:wght@400..700&family=Noto+Sans+Devanagari:wght@400..800&display=swap");
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=DM+Sans:ital,wght@0,400..800;1,400..800&family=Space+Grotesk:wght@400..700&family=Noto+Sans+Devanagari:wght@400..800&display=swap");
 
 @theme inline {
   --radius-sm: 0.5rem;
@@ -88,6 +88,8 @@
   .font-nepali { font-family: var(--font-nepali); }
 
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 6px; }
+
+  img { max-width: 100%; }
 }
 
 @layer utilities {
@@ -100,9 +102,7 @@
     border-radius: 2px;
     margin-top: 0.75rem;
   }
-  .grain {
-    position: relative;
-  }
+  .grain { position: relative; }
   .grain::after {
     content: "";
     position: absolute; inset: 0;
@@ -111,11 +111,79 @@
     pointer-events: none;
     mix-blend-mode: overlay;
   }
-  .marquee {
-    animation: marquee 30s linear infinite;
+
+  /* Soft aurora pastel background used for inner-page heroes */
+  .aurora-soft {
+    background:
+      radial-gradient(60% 60% at 12% 18%, rgba(155, 93, 213, 0.22), transparent 60%),
+      radial-gradient(50% 60% at 88% 12%, rgba(249, 115, 22, 0.18), transparent 60%),
+      radial-gradient(45% 55% at 90% 90%, rgba(155, 93, 213, 0.16), transparent 65%),
+      radial-gradient(70% 60% at 35% 100%, rgba(254, 243, 226, 0.7), transparent 55%),
+      linear-gradient(180deg, #FAF6FF 0%, #FFF7EE 100%);
   }
+  .aurora-deep {
+    background:
+      radial-gradient(60% 70% at 18% 25%, rgba(155, 93, 213, 0.55), transparent 60%),
+      radial-gradient(55% 65% at 82% 80%, rgba(249, 115, 22, 0.45), transparent 55%),
+      radial-gradient(40% 50% at 90% 20%, rgba(254, 243, 226, 0.35), transparent 60%),
+      linear-gradient(135deg, #2A1456 0%, #4F1F8C 55%, #6B2FA0 100%);
+  }
+
+  .soft-shadow { box-shadow: 0 14px 50px -16px rgba(107, 47, 160, 0.22); }
+  .soft-shadow-lg { box-shadow: 0 24px 70px -22px rgba(107, 47, 160, 0.28); }
+
+  .marquee { animation: marquee 30s linear infinite; }
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
+  }
+
+  .float-slow { animation: floatSlow 9s ease-in-out infinite; }
+  .float-slower { animation: floatSlow 13s ease-in-out infinite; }
+  @keyframes floatSlow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(1.5deg); }
+  }
+
+  .ken-burns { animation: kenBurns 22s ease-in-out infinite alternate; transform-origin: center; }
+  @keyframes kenBurns {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.08) translate(-2%, -1.5%); }
+  }
+
+  .shape-curve-bottom {
+    -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, black 70%, transparent 71%);
+            mask-image: radial-gradient(120% 90% at 50% 0%, black 70%, transparent 71%);
+  }
+
+  /* For overlapping image collage on hero */
+  .photo-frame {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 18px 50px -18px rgba(26, 16, 53, 0.45);
+  }
+  .photo-frame > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .gradient-text-warm {
+    background: linear-gradient(135deg, #F97316 0%, #E11D48 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .underline-wavy-accent {
+    text-decoration: underline wavy;
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-primary-pale); border-radius: 999px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .float-slow, .float-slower, .ken-burns, .marquee { animation: none !important; }
+    * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
   }
 }

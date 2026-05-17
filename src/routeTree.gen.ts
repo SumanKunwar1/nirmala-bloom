@@ -21,6 +21,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProgramsSlugRouteImport } from './routes/programs.$slug'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
+import { Route as DonateSlugRouteImport } from './routes/donate.$slug'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -82,18 +83,24 @@ const NewsSlugRoute = NewsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => NewsRoute,
 } as any)
+const DonateSlugRoute = DonateSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DonateRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/donate': typeof DonateRoute
+  '/donate': typeof DonateRouteWithChildren
   '/gallery': typeof GalleryRoute
   '/news': typeof NewsRouteWithChildren
   '/partners': typeof PartnersRoute
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
 }
@@ -101,13 +108,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/donate': typeof DonateRoute
+  '/donate': typeof DonateRouteWithChildren
   '/gallery': typeof GalleryRoute
   '/news': typeof NewsRouteWithChildren
   '/partners': typeof PartnersRoute
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
 }
@@ -116,13 +124,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/donate': typeof DonateRoute
+  '/donate': typeof DonateRouteWithChildren
   '/gallery': typeof GalleryRoute
   '/news': typeof NewsRouteWithChildren
   '/partners': typeof PartnersRoute
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/resources'
     | '/sitemap.xml'
+    | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/resources'
     | '/sitemap.xml'
+    | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/programs'
     | '/resources'
     | '/sitemap.xml'
+    | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
   fileRoutesById: FileRoutesById
@@ -175,7 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
-  DonateRoute: typeof DonateRoute
+  DonateRoute: typeof DonateRouteWithChildren
   GalleryRoute: typeof GalleryRoute
   NewsRoute: typeof NewsRouteWithChildren
   PartnersRoute: typeof PartnersRoute
@@ -270,8 +282,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof NewsRoute
     }
+    '/donate/$slug': {
+      id: '/donate/$slug'
+      path: '/$slug'
+      fullPath: '/donate/$slug'
+      preLoaderRoute: typeof DonateSlugRouteImport
+      parentRoute: typeof DonateRoute
+    }
   }
 }
+
+interface DonateRouteChildren {
+  DonateSlugRoute: typeof DonateSlugRoute
+}
+
+const DonateRouteChildren: DonateRouteChildren = {
+  DonateSlugRoute: DonateSlugRoute,
+}
+
+const DonateRouteWithChildren =
+  DonateRoute._addFileChildren(DonateRouteChildren)
 
 interface NewsRouteChildren {
   NewsSlugRoute: typeof NewsSlugRoute
@@ -299,7 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
-  DonateRoute: DonateRoute,
+  DonateRoute: DonateRouteWithChildren,
   GalleryRoute: GalleryRoute,
   NewsRoute: NewsRouteWithChildren,
   PartnersRoute: PartnersRoute,
@@ -310,3 +340,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

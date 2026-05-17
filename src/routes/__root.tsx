@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingDonateButton } from "@/components/layout/FloatingDonateButton";
+import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 
 function NotFoundComponent() {
   return (
@@ -82,6 +83,7 @@ function RootComponent() {
       </main>
       <Footer />
       <FloatingDonateButton />
+      <WhatsAppButton />
     </QueryClientProvider>
   );
 }
