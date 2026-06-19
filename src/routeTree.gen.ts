@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as PartnersRouteImport } from './routes/partners'
@@ -23,11 +22,6 @@ import { Route as ProgramsSlugRouteImport } from './routes/programs.$slug'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as DonateSlugRouteImport } from './routes/donate.$slug'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
@@ -99,7 +93,6 @@ export interface FileRoutesByFullPath {
   '/partners': typeof PartnersRoute
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
@@ -114,7 +107,6 @@ export interface FileRoutesByTo {
   '/partners': typeof PartnersRoute
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
@@ -130,7 +122,6 @@ export interface FileRoutesById {
   '/partners': typeof PartnersRoute
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
@@ -147,7 +138,6 @@ export interface FileRouteTypes {
     | '/partners'
     | '/programs'
     | '/resources'
-    | '/sitemap.xml'
     | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
@@ -162,7 +152,6 @@ export interface FileRouteTypes {
     | '/partners'
     | '/programs'
     | '/resources'
-    | '/sitemap.xml'
     | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
@@ -177,7 +166,6 @@ export interface FileRouteTypes {
     | '/partners'
     | '/programs'
     | '/resources'
-    | '/sitemap.xml'
     | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
@@ -193,18 +181,10 @@ export interface RootRouteChildren {
   PartnersRoute: typeof PartnersRoute
   ProgramsRoute: typeof ProgramsRouteWithChildren
   ResourcesRoute: typeof ResourcesRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/resources': {
       id: '/resources'
       path: '/resources'
@@ -335,18 +315,7 @@ const rootRouteChildren: RootRouteChildren = {
   PartnersRoute: PartnersRoute,
   ProgramsRoute: ProgramsRouteWithChildren,
   ResourcesRoute: ResourcesRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Heart } from "lucide-react";
 import { navLinks } from "@/lib/constants";
 import logo from "@/assets/nirmala-logo.png";
 
@@ -51,8 +52,9 @@ export function Navbar() {
                 </button>
               ))}
             </div>
-            <Link to="/donate" className="hidden md:inline-flex items-center bg-accent text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-md shadow-orange-200 hover:scale-105 transition-transform">
-              Donate Now
+            <Link to="/donate" className="hidden md:inline-flex items-center gap-1.5 bg-accent text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-[0_10px_24px_-10px_rgba(217,115,43,0.8)] hover:-translate-y-0.5 transition-transform">
+              <Heart className="h-4 w-4" />
+              Donate
             </Link>
             <button className="lg:hidden p-2 text-ink" onClick={() => setOpen(true)} aria-label="Open menu">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>

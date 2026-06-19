@@ -15,6 +15,11 @@ export const imgs = {
   heroJoy: U("1542810634-71277d95dcbb", 900),
   heroNepal: U("1488521787991-ed7bbaae773c", 1400),
 
+  // Founder — Nirmala Bhandari (placeholders; client to swap for real portraits)
+  founderPortrait: U("1573496359142-b8d87734a5a2", 1000),
+  founderAction: U("1593113598332-cd288d649433", 1100),
+  founderCommunity: U("1531983412531-1f49a365ffed", 1100),
+
   // About — story / founder / team feel
   aboutStory: U("1573497019418-b400bb3ab074", 1100),
   aboutFounder: U("1573497019940-1c28c88b4f3e", 900),
@@ -79,6 +84,17 @@ export const newsImages: Record<string, string> = {
   "utpala-cafe-stall": imgs.newsUtpala,
   "vidhya-byayam": imgs.newsVidhya,
   "press-coverage-himalayan": imgs.newsPress,
+};
+
+export const partnerImages: Record<string, string> = {
+  "UN Women Nepal": U("1573164574572-cb89e39749b4", 900),
+  "New Futures Nepal": U("1559027615-cd4628902d4a", 900),
+  "Bodhisattvas in Action": U("1542178243-bc20204b769f", 900),
+  "Utpala Cafe": U("1554118811-1e0d58224f24", 900),
+  "Vidhya Byayam": U("1546519638-68e109acd27d", 900),
+  "Godawari Botanical Gardens": U("1545389336-cf090694435e", 900),
+  "The Himalayan Times": U("1495020689067-958852a7765e", 900),
+  "Daraz Nepal": U("1607082348824-0a96f2a4b9da", 900),
 };
 
 export const campaignImages: Record<string, string> = {

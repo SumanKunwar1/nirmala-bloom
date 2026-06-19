@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { ComponentType } from "react";
+import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import { PageHero } from "@/components/shared/PageHero";
 import { SocialIcons } from "@/components/shared/SocialIcons";
 import { imgs } from "@/lib/images";
@@ -48,7 +50,7 @@ function ContactPage() {
             rows={6}
             className="w-full rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary"
           />
-          <button className="bg-accent text-white rounded-full px-8 py-3 font-semibold hover:-translate-y-0.5 transition-transform shadow-md shadow-orange-200">
+          <button className="bg-accent text-white rounded-full px-8 py-3 font-semibold hover:-translate-y-0.5 transition-transform shadow-[0_10px_24px_-10px_rgba(217,115,43,0.7)]">
             Send message →
           </button>
         </form>
@@ -57,15 +59,15 @@ function ContactPage() {
           <div className="rounded-3xl bg-gradient-to-br from-primary-pale to-accent-light/60 p-7">
             <h3 className="font-display text-xl font-semibold mb-5">Get in touch</h3>
             <ul className="space-y-4 text-sm text-text/80">
-              <ContactRow icon="📍" label="Address" value="Kathmandu, Nepal" />
-              <ContactRow icon="📞" label="Phone" value="+977 9800000000" />
-              <ContactRow icon="✉️" label="Email" value="info@nirmalafoundation.org.np" />
+              <ContactRow icon={MapPin} label="Address" value="Kathmandu, Nepal" />
+              <ContactRow icon={Phone} label="Phone" value="+977 9800000000" />
+              <ContactRow icon={Mail} label="Email" value="info@nirmalafoundation.org.np" />
             </ul>
             <a
               href="https://wa.me/9779800000000"
               className="mt-6 inline-flex items-center gap-2 bg-green text-white rounded-full px-5 py-2.5 text-sm font-semibold hover:-translate-y-0.5 transition-transform"
             >
-              💬 WhatsApp us
+              <MessageCircle className="h-4 w-4" /> WhatsApp us
             </a>
             <div className="mt-6">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-text/55 mb-3">
@@ -102,10 +104,20 @@ function Select({ children }: { children: React.ReactNode }) {
     </select>
   );
 }
-function ContactRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+function ContactRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
   return (
     <li className="flex items-start gap-3">
-      <div className="w-9 h-9 rounded-xl bg-white grid place-items-center shrink-0">{icon}</div>
+      <div className="w-9 h-9 rounded-xl bg-white grid place-items-center shrink-0 text-primary">
+        <Icon className="h-4 w-4" />
+      </div>
       <div>
         <div className="font-semibold text-ink text-sm">{label}</div>
         <div className="text-text/75">{value}</div>

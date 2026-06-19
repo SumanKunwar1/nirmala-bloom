@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { Award, Target, Eye, HeartHandshake } from "lucide-react";
 import { PageHero } from "@/components/shared/PageHero";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { PersonCard } from "@/components/shared/PersonCard";
@@ -33,33 +34,56 @@ function About() {
         imageAlt="Smiling people from the Nirmala Foundation community"
       />
 
-      {/* Story */}
+      {/* Founder story */}
       <section className="py-24 mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-16 items-center">
         <ScrollReveal>
-          <SectionHeading eyebrow="Our Story" title="From Hope Centre to national champion." />
+          <SectionHeading eyebrow="Our founder" title="The woman behind the foundation." />
           <div className="space-y-4 text-text/80 leading-relaxed">
             <p>
-              Nirmala Foundation Nepal was founded in January 2024 by{" "}
-              <strong className="text-ink">Nirmala Bhandari</strong> — a former Hope Centre resident, national
-              wheelchair basketball player, para-powerlifter, Miss Disability Queen, and UN Women Nepal honoree.
+              The Nirmala Foundation Nepal was founded in January 2024 by{" "}
+              <strong className="text-ink">Nirmala Bhandari</strong> — a woman with a disability whose own life is the
+              reason this organisation exists. From her early years as a resident of the Hope Centre, she refused to let
+              circumstance decide what she could become.
             </p>
             <p>
-              Recognized on the D-30 Disability Impact List 2025, Nirmala leads a team committed to dignity, mobility,
-              and joy for Nepalis with disabilities.
+              Today she is a national wheelchair basketball player and para-powerlifter, a{" "}
+              <strong className="text-ink">Miss Disability Queen</strong>, a UN Women Nepal honoree, and was named to the{" "}
+              <strong className="text-ink">D-30 Disability Impact List 2025</strong>. But her proudest work is here —
+              leading a team that builds dignity, mobility and joy for Nepalis with disabilities, every single day.
+            </p>
+            <p>
+              Nirmala&apos;s lived experience shapes everything: programmes are co-created with the people they serve, not
+              designed for them from a distance.
             </p>
           </div>
           <blockquote className="mt-8 border-l-4 border-accent pl-6 py-2 text-xl font-display italic text-ink">
             &ldquo;We don&apos;t ask for permission to belong. We build belonging — every day, in every community.&rdquo;
           </blockquote>
+
+          <ul className="mt-8 grid sm:grid-cols-2 gap-3">
+            {[
+              "National wheelchair basketball player",
+              "Para-powerlifter",
+              "Miss Disability Queen",
+              "D-30 Honoree 2025",
+            ].map((h) => (
+              <li key={h} className="flex items-center gap-3 rounded-2xl bg-primary-pale/60 border border-border px-4 py-3">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
+                <span className="text-sm text-ink font-medium leading-tight">{h}</span>
+              </li>
+            ))}
+          </ul>
         </ScrollReveal>
         <ScrollReveal delay={0.2}>
           <div className="relative">
-            <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/20 to-accent/20 blur-2xl" aria-hidden />
+            <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/15 to-accent/15 blur-2xl" aria-hidden />
             <div className="relative photo-frame aspect-[4/5] soft-shadow-lg">
-              <img src={imgs.aboutStory} alt="Founder Nirmala Bhandari with the team" className="ken-burns" />
+              <img src={imgs.founderPortrait} alt="Nirmala Bhandari, founder of the Nirmala Foundation" className="ken-burns" />
             </div>
             <div className="absolute -bottom-6 -left-6 hidden md:flex items-center gap-3 rounded-2xl bg-white px-4 py-3 soft-shadow">
-              <div className="w-9 h-9 rounded-full bg-accent/15 grid place-items-center text-accent">🏅</div>
+              <div className="w-9 h-9 rounded-full bg-accent/15 grid place-items-center">
+                <Award className="h-4 w-4 text-accent" />
+              </div>
               <div className="text-xs leading-tight">
                 <div className="font-semibold text-ink">D-30 Honoree 2025</div>
                 <div className="text-text/55">Global disability impact list</div>
@@ -80,19 +104,19 @@ function About() {
           <div className="grid md:grid-cols-3 gap-6 mt-12">
             {[
               {
-                icon: "🎯",
+                icon: Target,
                 title: "Mission",
                 text: "To empower people with disabilities in Nepal through inclusive sports, arts, education, and mobility.",
-                color: "#6B2FA0",
+                color: "#5B2C86",
               },
               {
-                icon: "👁️",
+                icon: Eye,
                 title: "Vision",
                 text: "A Nepal where every person — regardless of ability — belongs, contributes, and thrives.",
-                color: "#F97316",
+                color: "#D9732B",
               },
               {
-                icon: "💜",
+                icon: HeartHandshake,
                 title: "Values",
                 text: "Dignity, accessibility, joy, community, and unwavering advocacy.",
                 color: "#2D7A4F",
@@ -102,10 +126,10 @@ function About() {
                 <div className="relative h-full rounded-3xl bg-white p-7 soft-shadow overflow-hidden">
                   <div
                     className="absolute top-0 left-0 right-0 h-1.5"
-                    style={{ background: `linear-gradient(90deg, ${c.color}, #F97316)` }}
+                    style={{ background: `linear-gradient(90deg, ${c.color}, #D9732B)` }}
                   />
-                  <div className="w-14 h-14 rounded-2xl grid place-items-center text-2xl bg-gradient-to-br from-primary-pale to-accent-light mb-4">
-                    {c.icon}
+                  <div className="w-14 h-14 rounded-2xl grid place-items-center bg-primary-pale text-primary mb-4">
+                    <c.icon className="h-7 w-7" />
                   </div>
                   <h3 className="font-display text-2xl font-semibold mb-2 text-ink">{c.title}</h3>
                   <p className="text-text/75 leading-relaxed">{c.text}</p>

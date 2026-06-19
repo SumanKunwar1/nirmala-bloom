@@ -127,7 +127,7 @@ function CampaignDetail() {
                   animate={{ width: `${pct}%` }}
                   transition={{ duration: 1.6, ease: "easeOut", delay: 0.4 }}
                   className="h-full rounded-full"
-                  style={{ background: `linear-gradient(90deg, ${c.color}, #F97316)` }}
+                  style={{ background: `linear-gradient(90deg, ${c.color}, #D9732B)` }}
                 />
               </div>
               <div className="flex justify-between text-xs text-text/60 mt-2">
@@ -216,7 +216,7 @@ function CampaignDetail() {
                     <div
                       className="w-16 h-16 rounded-2xl grid place-items-center text-white font-mono-stat font-bold shrink-0 text-center leading-tight"
                       style={{
-                        background: `linear-gradient(135deg, ${c.color}, #F97316)`,
+                        background: `linear-gradient(135deg, ${c.color}, #D9732B)`,
                         fontSize: t.amount >= 100000 ? 12 : 13,
                       }}
                     >
@@ -292,7 +292,7 @@ function CampaignDetail() {
                     viewport={{ once: true }}
                     transition={{ duration: 1.4, ease: "easeOut" }}
                     className="h-full rounded-full"
-                    style={{ background: `linear-gradient(90deg, ${c.color}, #F97316)` }}
+                    style={{ background: `linear-gradient(90deg, ${c.color}, #D9732B)` }}
                   />
                 </div>
                 <div className="flex justify-between text-[11px] text-text/60 mt-2">

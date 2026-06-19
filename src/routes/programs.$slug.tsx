@@ -177,7 +177,7 @@ function ProgramDetail() {
       <section
         className="py-24 grain text-center text-white relative overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${p.color} 0%, #6B2FA0 60%, #F97316 130%)`,
+          background: `linear-gradient(135deg, ${p.color} 0%, #5B2C86 60%, #D9732B 130%)`,
         }}
       >
         <div className="mx-auto max-w-3xl px-6 relative">

@@ -1,8 +1,15 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import { sharedValues } from "@/lib/images";
+import { Scale, Users, Vote, MapPin } from "lucide-react";
 
 type Stat = { value: string; label: string };
+
+/** Rights-based value strip — inspired by CIL-Kathmandu's advocacy framing. */
+const rights = [
+  { icon: Scale, label: "Dignity", text: "The right to live with dignity." },
+  { icon: Users, label: "Participation", text: "The right to take part in every aspect of life." },
+  { icon: Vote, label: "Self-determination", text: "The right to make our own decisions." },
+];
 
 export function PageHero({
   title,
@@ -24,19 +31,17 @@ export function PageHero({
   showValues?: boolean;
 }) {
   return (
-    <section className="relative overflow-hidden aurora-soft pt-28 md:pt-36 pb-14 md:pb-20">
-      <DecorPetals />
-      <DecorDots />
-
+    <section className="relative overflow-hidden aurora-soft grain pt-28 md:pt-36 pb-14 md:pb-20">
       <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10 items-center">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="lg:col-span-7"
         >
           {eyebrow && (
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur border border-primary/15 px-4 py-1.5 mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white border border-border px-4 py-1.5 mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary soft-shadow">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
               {eyebrow}
             </div>
           )}
@@ -44,15 +49,13 @@ export function PageHero({
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-5 text-lg md:text-xl text-text/75 max-w-2xl leading-relaxed">
-              {subtitle}
-            </p>
+            <p className="mt-5 text-lg md:text-xl text-text/80 max-w-2xl leading-relaxed">{subtitle}</p>
           )}
 
           {stats && stats.length > 0 && (
             <div className="mt-7 flex flex-wrap gap-3">
               {stats.map((s) => (
-                <div key={s.label} className="rounded-2xl bg-white/80 backdrop-blur border border-primary/10 px-4 py-2.5 soft-shadow">
+                <div key={s.label} className="rounded-2xl bg-card border border-border px-4 py-2.5 soft-shadow">
                   <div className="font-mono-stat font-bold text-primary text-lg leading-none">{s.value}</div>
                   <div className="text-[11px] uppercase tracking-wider text-text/55 mt-1">{s.label}</div>
                 </div>
@@ -66,28 +69,16 @@ export function PageHero({
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, ease: "easeOut", delay: 0.15 }}
-            className="lg:col-span-5 relative h-[260px] sm:h-[320px] md:h-[380px]"
+            className="lg:col-span-5 relative h-[260px] sm:h-[320px] md:h-[400px]"
           >
-            <div className="absolute -top-4 -left-4 w-24 h-24 rounded-full bg-accent/20 blur-2xl float-slow" aria-hidden />
-            <div className="absolute -bottom-6 -right-4 w-28 h-28 rounded-full bg-primary/25 blur-2xl float-slower" aria-hidden />
-
             <div className="photo-frame absolute inset-0">
               <img src={image} alt={imageAlt} loading="lazy" className="ken-burns" />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/15 via-transparent to-transparent pointer-events-none" />
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="hidden sm:flex absolute -bottom-5 -left-5 items-center gap-3 rounded-2xl bg-white/95 backdrop-blur border border-primary/10 px-4 py-3 soft-shadow"
-            >
-              <div className="w-9 h-9 rounded-full grid place-items-center bg-accent/15 text-accent text-lg">✨</div>
-              <div className="text-xs">
-                <div className="font-semibold text-ink leading-tight">Inclusive · Joyful</div>
-                <div className="text-text/55">Built with care in Nepal</div>
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/95 backdrop-blur px-3.5 py-1.5 text-xs font-medium text-ink">
+                <MapPin className="h-3.5 w-3.5 text-accent" />
+                Kathmandu, Nepal
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </div>
@@ -96,18 +87,18 @@ export function PageHero({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
+          transition={{ delay: 0.35, duration: 0.7 }}
           className="relative mx-auto max-w-7xl px-6 mt-12 md:mt-16"
         >
-          <div className="rounded-3xl bg-white/75 backdrop-blur-md border border-primary/10 px-6 py-5 grid sm:grid-cols-3 gap-4 soft-shadow">
-            {sharedValues.map((v) => (
+          <div className="rounded-3xl bg-card border border-border px-6 py-5 grid sm:grid-cols-3 gap-5 soft-shadow">
+            {rights.map((v) => (
               <div key={v.label} className="flex items-center gap-3">
-                <div className="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-primary-pale to-accent-light grid place-items-center text-xl">
-                  {v.icon}
-                </div>
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary-pale text-primary">
+                  <v.icon className="h-5 w-5" />
+                </span>
                 <div>
                   <div className="font-display text-base font-semibold text-ink leading-tight">{v.label}</div>
-                  <div className="text-xs text-text/60">{v.text}</div>
+                  <div className="text-xs text-text/65 leading-snug">{v.text}</div>
                 </div>
               </div>
             ))}
@@ -118,65 +109,7 @@ export function PageHero({
   );
 }
 
-function DecorPetals() {
-  return (
-    <svg
-      className="absolute -top-10 -right-20 w-[420px] h-[420px] opacity-[0.10] pointer-events-none float-slower text-primary"
-      viewBox="0 0 200 200"
-      fill="currentColor"
-      aria-hidden
-    >
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-        <ellipse
-          key={deg}
-          cx="100"
-          cy="58"
-          rx="22"
-          ry="48"
-          transform={`rotate(${deg} 100 100)`}
-        />
-      ))}
-    </svg>
-  );
-}
-
-function DecorDots() {
-  return (
-    <svg
-      className="absolute bottom-10 left-6 w-32 h-32 opacity-30 pointer-events-none text-accent"
-      viewBox="0 0 120 120"
-      fill="currentColor"
-      aria-hidden
-    >
-      {Array.from({ length: 6 }).map((_, r) =>
-        Array.from({ length: 6 }).map((_, c) => (
-          <circle key={`${r}-${c}`} cx={10 + c * 18} cy={10 + r * 18} r="1.6" />
-        )),
-      )}
-    </svg>
-  );
-}
-
 /** Re-export for legacy imports (HeroSection/DonateCtaSection use it). */
 export function LotusDecor() {
-  return (
-    <svg
-      className="absolute -top-20 -right-20 w-[480px] h-[480px] opacity-15 pointer-events-none float-slower"
-      viewBox="0 0 200 200"
-      fill="none"
-      aria-hidden
-    >
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-        <ellipse
-          key={deg}
-          cx="100"
-          cy="60"
-          rx="22"
-          ry="50"
-          fill="white"
-          transform={`rotate(${deg} 100 100)`}
-        />
-      ))}
-    </svg>
-  );
+  return null;
 }

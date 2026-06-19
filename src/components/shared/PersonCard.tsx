@@ -33,7 +33,7 @@ export function PersonCard({
         ) : (
           <div
             className="absolute inset-0 grid place-items-center text-4xl font-display font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #6B2FA0, #F97316)" }}
+            style={{ background: "linear-gradient(135deg, #5B2C86, #D9732B)" }}
           >
             {initials}
           </div>

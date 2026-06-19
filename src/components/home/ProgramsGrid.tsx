@@ -11,8 +11,8 @@ export function ProgramsGrid() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex items-end justify-between flex-wrap gap-6 mb-12">
           <SectionHeading
-            eyebrow="What We Do"
-            title="Programs that build belonging"
+            eyebrow="Our work"
+            title="The projects we run"
             subtitle="Six interconnected pathways to inclusion — from the basketball court to the classroom and beyond."
           />
           <Link

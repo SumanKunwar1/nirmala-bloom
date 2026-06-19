@@ -19,9 +19,9 @@ export function TestimonialsCarousel() {
       onMouseLeave={() => setPaused(false)}
       style={{
         background:
-          "radial-gradient(50% 60% at 80% 10%, rgba(249,115,22,0.10), transparent 60%)," +
-          "radial-gradient(60% 70% at 12% 100%, rgba(155,93,213,0.16), transparent 60%)," +
-          "linear-gradient(180deg, #FAF6FF 0%, #FFFFFF 100%)",
+          "radial-gradient(50% 60% at 80% 10%, rgba(217,115,43,0.08), transparent 60%)," +
+          "radial-gradient(60% 70% at 12% 100%, rgba(91,44,134,0.08), transparent 60%)," +
+          "linear-gradient(180deg, #FDFAF5 0%, #FFFFFF 100%)",
       }}
     >
       <div className="mx-auto max-w-3xl px-6 text-center">

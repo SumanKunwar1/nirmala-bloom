@@ -66,7 +66,7 @@ export function DonationCampaignCard({ campaign }: { campaign: DonationCampaign 
               viewport={{ once: true }}
               transition={{ duration: 1.4, ease: "easeOut" }}
               className="h-full rounded-full"
-              style={{ background: `linear-gradient(90deg, ${campaign.color}, #F97316)` }}
+              style={{ background: `linear-gradient(90deg, ${campaign.color}, #D9732B)` }}
             />
           </div>
           <div className="flex justify-between text-[11px] text-text/55 mt-2">

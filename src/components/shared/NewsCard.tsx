@@ -9,7 +9,7 @@ export function NewsCard({
   date,
   excerpt,
   readTime,
-  color = "#6B2FA0",
+  color = "#5B2C86",
 }: {
   slug: string;
   title: string;
@@ -37,7 +37,7 @@ export function NewsCard({
         ) : (
           <div
             className="absolute inset-0 grain"
-            style={{ background: `linear-gradient(135deg, ${color} 0%, #F97316 100%)` }}
+            style={{ background: `linear-gradient(135deg, ${color} 0%, #D9732B 100%)` }}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />

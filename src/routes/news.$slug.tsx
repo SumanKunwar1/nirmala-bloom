@@ -45,7 +45,7 @@ function NewsDetail() {
           {image ? (
             <img src={image} alt={post.title} className="ken-burns" />
           ) : (
-            <div className="absolute inset-0 grain" style={{ background: "linear-gradient(135deg, #6B2FA0, #F97316)" }} />
+            <div className="absolute inset-0 grain" style={{ background: "linear-gradient(135deg, #5B2C86, #D9732B)" }} />
           )}
         </div>
       </div>

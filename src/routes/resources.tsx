@@ -7,8 +7,8 @@ import { imgs } from "@/lib/images";
 const tabs = ["All", "Annual Reports", "Research", "Policy Briefs", "Guides"] as const;
 
 const categoryColors: Record<string, string> = {
-  "Annual Reports": "#6B2FA0",
-  Research: "#F97316",
+  "Annual Reports": "#5B2C86",
+  Research: "#D9732B",
   "Policy Briefs": "#2D7A4F",
   Guides: "#0891B2",
 };
@@ -85,7 +85,7 @@ function ResourcesPage() {
         </div>
         <div className="grid md:grid-cols-2 gap-6">
           {filtered.map((r) => {
-            const color = categoryColors[r.category] ?? "#6B2FA0";
+            const color = categoryColors[r.category] ?? "#5B2C86";
             return (
               <article
                 key={r.title}

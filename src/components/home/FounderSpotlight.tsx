@@ -1,0 +1,85 @@
+import { motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
+import { Quote, Award, Trophy, Crown, ArrowRight } from "lucide-react";
+import { imgs } from "@/lib/images";
+
+const honours = [
+  { icon: Trophy, label: "National wheelchair basketball player" },
+  { icon: Award, label: "D-30 Disability Impact List, 2025" },
+  { icon: Crown, label: "Miss Disability Queen · UN Women honoree" },
+];
+
+export function FounderSpotlight() {
+  return (
+    <section className="relative overflow-hidden py-24 md:py-28 aurora-deep grain">
+      <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        {/* Portrait + honours */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="lg:col-span-5 relative"
+        >
+          <div className="photo-frame aspect-[4/5] max-w-md mx-auto">
+            <img
+              src={imgs.founderAction}
+              alt="Nirmala Bhandari competing in wheelchair basketball"
+              className="ken-burns"
+            />
+          </div>
+          <div className="absolute -bottom-6 -right-2 md:right-6 rounded-2xl bg-white px-5 py-4 soft-shadow-lg max-w-[15rem]">
+            <div className="font-mono-stat text-3xl font-bold text-primary">2024</div>
+            <div className="text-sm text-text/70 leading-tight">Founded the Nirmala Foundation in Kathmandu</div>
+          </div>
+        </motion.div>
+
+        {/* Story */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="lg:col-span-7 text-white"
+        >
+          <div className="mb-3 text-xs font-semibold tracking-[0.2em] uppercase text-accent">Meet our founder</div>
+          <h2 className="font-display text-4xl md:text-5xl font-semibold leading-tight" style={{ color: "#fff" }}>
+            Nirmala Bhandari
+          </h2>
+          <p className="mt-5 text-lg text-white/85 leading-relaxed max-w-2xl">
+            A woman with a disability who turned her own journey — from a Hope Centre resident to a
+            national para-athlete — into a movement. Nirmala founded this organisation so that no
+            Nepali with a disability has to fight alone for the chance to belong.
+          </p>
+
+          <figure className="mt-8 border-l-4 border-accent pl-6">
+            <Quote className="h-7 w-7 text-accent" />
+            <blockquote className="mt-2 font-display italic text-xl md:text-2xl leading-relaxed" style={{ color: "#fff" }}>
+              We don&apos;t ask for permission to belong. We build belonging — every day, in every community.
+            </blockquote>
+            <figcaption className="mt-3 text-sm text-white/65">Nirmala Bhandari, Founder &amp; Executive Director</figcaption>
+          </figure>
+
+          <ul className="mt-8 grid sm:grid-cols-2 gap-3">
+            {honours.map((h) => (
+              <li key={h.label} className="flex items-center gap-3 rounded-2xl bg-white/10 border border-white/15 px-4 py-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/20 text-accent">
+                  <h.icon className="h-4 w-4" />
+                </span>
+                <span className="text-sm text-white/90 leading-tight">{h.label}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            to="/about"
+            className="group mt-9 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-primary transition-all hover:-translate-y-0.5"
+          >
+            Read Nirmala&apos;s full story
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}

@@ -232,11 +232,125 @@ export const team = [
   { name: "Maya Shrestha", role: "Communications", bio: "Storytelling, press, and digital advocacy for the foundation." },
 ];
 
-export const partners = [
-  { name: "New Futures Nepal", desc: "Long-term collaborator on disability inclusion programming." },
-  { name: "UN Women Nepal", desc: "Partner on gender and disability advocacy initiatives." },
-  { name: "Bodhisattvas in Action", desc: "Volunteer mobilization and community outreach support." },
-  { name: "Utpala Cafe", desc: "Hosts inclusive arts pop-ups and community gatherings." },
+export type Partner = {
+  name: string;
+  tagline: string;
+  desc: string;
+  region: "International" | "National";
+  type: "Strategic" | "Programme" | "Corporate" | "Community" | "Media";
+  since: string;
+  areas: string[];
+  url: string;
+  color: string;
+  initials?: string;
+  /** Real logo CDN URL — falls back to initials tile if it 404s. */
+  logoDomain?: string;
+  featured?: boolean;
+};
+
+export const partners: Partner[] = [
+  {
+    name: "UN Women Nepal",
+    tagline: "Gender equality & advocacy",
+    desc: "Partner on gender and disability advocacy initiatives — co-designed our Women & Disability research and the Miss Disability Queen platform.",
+    region: "International",
+    type: "Strategic",
+    since: "2024",
+    areas: ["Gender", "Advocacy", "Research"],
+    url: "https://nepal.unwomen.org",
+    color: "#0091D5",
+    initials: "UN",
+    logoDomain: "unwomen.org",
+    featured: true,
+  },
+  {
+    name: "New Futures Nepal",
+    tagline: "Inclusion & rehabilitation",
+    desc: "Long-term strategic collaborator on disability inclusion programming and rehabilitation pathways across the Kathmandu Valley.",
+    region: "International",
+    type: "Strategic",
+    since: "2024",
+    areas: ["Inclusion", "Rehabilitation", "Capacity-building"],
+    url: "https://newfuturesnepal.org",
+    color: "#6B2FA0",
+    initials: "NF",
+    logoDomain: "newfuturesnepal.org",
+  },
+  {
+    name: "Bodhisattvas in Action",
+    tagline: "Volunteers & outreach",
+    desc: "Volunteer mobilization and community outreach support — runs our weekend tutoring circles and rural camp logistics.",
+    region: "International",
+    type: "Community",
+    since: "2024",
+    areas: ["Volunteers", "Outreach"],
+    url: "https://bodhisattvasinaction.org",
+    color: "#F97316",
+    initials: "BA",
+    logoDomain: "bodhisattvasinaction.org",
+  },
+  {
+    name: "Utpala Cafe",
+    tagline: "Arts pop-ups & community",
+    desc: "Hosts inclusive arts pop-ups and community gatherings. The cafe's monthly stall has become the foundation's storefront for handicraft sales.",
+    region: "National",
+    type: "Community",
+    since: "2024",
+    areas: ["Arts", "Retail", "Events"],
+    url: "#",
+    color: "#E11D48",
+    initials: "UC",
+  },
+  {
+    name: "Vidhya Byayam",
+    tagline: "Adaptive sports facility",
+    desc: "Sports facility partner — provides court time, training space, and equipment storage for our wheelchair basketball and para-badminton programmes.",
+    region: "National",
+    type: "Programme",
+    since: "2024",
+    areas: ["Adaptive sports", "Facility"],
+    url: "#",
+    color: "#2D7A4F",
+    initials: "VB",
+  },
+  {
+    name: "Godawari Botanical Gardens",
+    tagline: "Accessible nature retreats",
+    desc: "Hosted our first inclusive wellness retreat. Continuing collaborator on accessible nature programming and outdoor therapy.",
+    region: "National",
+    type: "Community",
+    since: "2024",
+    areas: ["Wellness", "Outdoor"],
+    url: "#",
+    color: "#0891B2",
+    initials: "GB",
+  },
+  {
+    name: "The Himalayan Times",
+    tagline: "English-language press",
+    desc: "Media partner — featured the founder's profile and continues to cover our programmes across English print and digital.",
+    region: "National",
+    type: "Media",
+    since: "2025",
+    areas: ["Press", "Storytelling"],
+    url: "https://thehimalayantimes.com",
+    color: "#9B5DD5",
+    initials: "HT",
+    logoDomain: "thehimalayantimes.com",
+  },
+  {
+    name: "Daraz Nepal",
+    tagline: "E-commerce & CSR",
+    desc: "Corporate partner — facilitated our online handicraft pop-up and matched donations to the school supplies campaign for two seasons.",
+    region: "International",
+    type: "Corporate",
+    since: "2025",
+    areas: ["E-commerce", "Matching"],
+    url: "https://daraz.com.np",
+    color: "#F85606",
+    initials: "DZ",
+    logoDomain: "daraz.com.np",
+  },
 ];
 
 export const testimonials = [
