@@ -49,25 +49,27 @@ export function PersonCard({
         )}
       </div>
 
-      {/* Info panel */}
-      <div className="flex flex-col grow bg-primary-pale/30 px-5 pb-6">
-        {/* Social bar — square buttons sitting at the photo seam */}
-        <div className="-mt-5 mb-4 flex gap-2">
-          {socials.map(({ Icon, label }) => (
-            <a
-              key={label}
-              href="#"
-              aria-label={label}
-              className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-white soft-shadow transition-colors hover:bg-accent"
-            >
-              <Icon className="h-4 w-4" />
-            </a>
-          ))}
-        </div>
+      {/* Info — fully centered */}
+      <div className="flex flex-col grow items-center text-center px-5 pt-6 pb-5">
+        <h3 className="font-display text-lg font-semibold text-ink leading-tight">{name}</h3>
+        <div className="text-accent text-sm font-medium mt-1">{role}</div>
+        {bio && <p className="text-text/65 text-sm leading-relaxed mt-3">{bio}</p>}
 
-        <h3 className="font-display text-lg font-semibold text-ink leading-tight text-center">{name}</h3>
-        <div className="text-accent text-sm font-medium mt-1 text-center">{role}</div>
-        {bio && <p className="text-text/65 text-sm leading-relaxed mt-3 text-center">{bio}</p>}
+        {/* Social row — pinned to bottom, divider keeps all cards aligned */}
+        <div className="mt-auto w-full pt-6">
+          <div className="border-t border-border pt-5 flex justify-center gap-2.5">
+            {socials.map(({ Icon, label }) => (
+              <a
+                key={label}
+                href="#"
+                aria-label={label}
+                className="grid h-9 w-9 place-items-center rounded-full border border-border text-primary transition-colors hover:bg-primary hover:text-white hover:border-primary"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </motion.div>
   );
