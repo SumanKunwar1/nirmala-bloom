@@ -185,7 +185,7 @@ function About() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.1 }}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {team.map((p, i) => (
               <motion.div key={p.name} variants={itemVariants}>

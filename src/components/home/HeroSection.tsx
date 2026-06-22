@@ -129,9 +129,9 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.55 }}
-              className="hidden md:block absolute -bottom-8 -left-8 w-44 photo-frame aspect-square ring-4 ring-background"
+              className="hidden md:block absolute -bottom-8 -left-8 w-52 photo-frame aspect-[4/3] ring-4 ring-background"
             >
-              <img src={imgs.heroCommunity} alt="Community members together at a foundation event" className="ken-burns" />
+              <img src={imgs.founderCommunity} alt="The Nirmala Foundation community together at an event" className="ken-burns" />
             </motion.div>
           </div>
         </motion.div>

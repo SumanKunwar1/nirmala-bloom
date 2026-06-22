@@ -15,10 +15,12 @@ export const imgs = {
   heroJoy: U("1542810634-71277d95dcbb", 900),
   heroNepal: U("1488521787991-ed7bbaae773c", 1400),
 
-  // Founder — Nirmala Bhandari (placeholders; client to swap for real portraits)
-  founderPortrait: U("1573496359142-b8d87734a5a2", 1000),
+  // Founder — Nirmala Bhandari (real foundation photography)
+  founderPortrait:
+    "https://res.cloudinary.com/dihev9qxc/image/upload/v1782112531/WhatsApp_Image_2026-06-21_at_14.34.01_kskchp.jpg",
   founderAction: U("1593113598332-cd288d649433", 1100),
-  founderCommunity: U("1531983412531-1f49a365ffed", 1100),
+  founderCommunity:
+    "https://res.cloudinary.com/dihev9qxc/image/upload/v1782112730/WhatsApp_Image_2026-06-21_at_14.54.48_hz72m6.jpg",
 
   // About — story / founder / team feel
   aboutStory: U("1573497019418-b400bb3ab074", 1100),
