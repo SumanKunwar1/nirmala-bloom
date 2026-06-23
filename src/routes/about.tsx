@@ -34,63 +34,84 @@ function About() {
         imageAlt="Smiling people from the Nirmala Foundation community"
       />
 
-      {/* Founder story */}
-      <section className="py-24 mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-16 items-center">
-        <ScrollReveal>
-          <SectionHeading eyebrow="Our founder" title="The woman behind the foundation." />
-          <div className="space-y-4 text-text/80 leading-relaxed">
-            <p>
-              The Nirmala Foundation Nepal was founded in January 2024 by{" "}
-              <strong className="text-ink">Nirmala Bhandari</strong> — a woman with a disability whose own life is the
-              reason this organisation exists. From her early years as a resident of the Hope Centre, she refused to let
-              circumstance decide what she could become.
-            </p>
-            <p>
-              Today she is a national wheelchair basketball player and para-powerlifter, a{" "}
-              <strong className="text-ink">Miss Disability Queen</strong>, a UN Women Nepal honoree, and was named to the{" "}
-              <strong className="text-ink">D-30 Disability Impact List 2025</strong>. But her proudest work is here —
-              leading a team that builds dignity, mobility and joy for Nepalis with disabilities, every single day.
-            </p>
-            <p>
-              Nirmala&apos;s lived experience shapes everything: programmes are co-created with the people they serve, not
-              designed for them from a distance.
-            </p>
-          </div>
-          <blockquote className="mt-8 border-l-4 border-accent pl-6 py-2 text-xl font-display italic text-ink">
-            &ldquo;We don&apos;t ask for permission to belong. We build belonging — every day, in every community.&rdquo;
-          </blockquote>
+      {/* Founder — full-width hero image, description underneath */}
+      <section className="py-24 mx-auto max-w-7xl px-6">
+        <SectionHeading
+          eyebrow="Our founder"
+          title="The woman behind the foundation."
+          align="center"
+        />
 
-          <ul className="mt-8 grid sm:grid-cols-2 gap-3">
-            {[
-              "National wheelchair basketball player",
-              "Para-powerlifter",
-              "Miss Disability Queen",
-              "D-30 Honoree 2025",
-            ].map((h) => (
-              <li key={h} className="flex items-center gap-3 rounded-2xl bg-primary-pale/60 border border-border px-4 py-3">
-                <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
-                <span className="text-sm text-ink font-medium leading-tight">{h}</span>
-              </li>
-            ))}
-          </ul>
-        </ScrollReveal>
-        <ScrollReveal delay={0.2}>
-          <div className="relative">
-            <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/15 to-accent/15 blur-2xl" aria-hidden />
-            <div className="relative photo-frame aspect-[4/5] soft-shadow-lg">
-              <img src={imgs.founderPortrait} alt="Nirmala Bhandari, founder of the Nirmala Foundation" className="ken-burns" />
-            </div>
-            <div className="absolute -bottom-6 -left-6 hidden md:flex items-center gap-3 rounded-2xl bg-white px-4 py-3 soft-shadow">
-              <div className="w-9 h-9 rounded-full bg-accent/15 grid place-items-center">
-                <Award className="h-4 w-4 text-accent" />
+        {/* Full-width hero image of Nirmala */}
+        <ScrollReveal>
+          <div className="relative photo-frame aspect-[16/10] md:aspect-[16/7] soft-shadow-lg mt-4">
+            <img
+              src={imgs.founderAbout}
+              alt="Nirmala Bhandari, founder of the Nirmala Foundation"
+              className="ken-burns object-top"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/5 to-transparent" />
+            <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end justify-between gap-3">
+              <div className="text-white">
+                <div className="font-display text-2xl md:text-3xl font-semibold leading-tight">Nirmala Bhandari</div>
+                <div className="text-white/80 text-sm">Founder &amp; Executive Director</div>
               </div>
-              <div className="text-xs leading-tight">
-                <div className="font-semibold text-ink">D-30 Honoree 2025</div>
-                <div className="text-text/55">Global disability impact list</div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-xs font-semibold text-ink">
+                <Award className="h-4 w-4 text-accent" />
+                D-30 Honoree 2025
               </div>
             </div>
           </div>
         </ScrollReveal>
+
+        {/* Description underneath */}
+        <div className="mt-12 grid lg:grid-cols-3 gap-10 lg:gap-14">
+          <ScrollReveal className="lg:col-span-2">
+            <div className="space-y-4 text-text/80 leading-relaxed text-lg">
+              <p>
+                The Nirmala Foundation Nepal was founded in January 2024 by{" "}
+                <strong className="text-ink">Nirmala Bhandari</strong> — a woman with a disability whose own life is the
+                reason this organisation exists. From her early years as a resident of the Hope Centre, she refused to
+                let circumstance decide what she could become.
+              </p>
+              <p>
+                Today she is a national wheelchair basketball player and para-powerlifter, a{" "}
+                <strong className="text-ink">Miss Disability Queen</strong>, a UN Women Nepal honoree, and was named to
+                the <strong className="text-ink">D-30 Disability Impact List 2025</strong>. But her proudest work is
+                here — leading a team that builds dignity, mobility and joy for Nepalis with disabilities, every single
+                day.
+              </p>
+              <p>
+                Nirmala&apos;s lived experience shapes everything: programmes are co-created with the people they serve,
+                not designed for them from a distance.
+              </p>
+            </div>
+            <blockquote className="mt-8 border-l-4 border-accent pl-6 py-2 text-xl md:text-2xl font-display italic text-ink">
+              &ldquo;We don&apos;t ask for permission to belong. We build belonging — every day, in every
+              community.&rdquo;
+            </blockquote>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.15}>
+            <div className="rounded-3xl bg-primary-pale/40 border border-border p-7">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-accent mb-4">Honours</div>
+              <ul className="space-y-3">
+                {[
+                  "National wheelchair basketball player",
+                  "Para-powerlifter",
+                  "Miss Disability Queen",
+                  "UN Women Nepal honoree",
+                  "D-30 Disability Impact List 2025",
+                ].map((h) => (
+                  <li key={h} className="flex items-start gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+                    <span className="text-sm text-ink font-medium leading-snug">{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </ScrollReveal>
+        </div>
       </section>
 
       {/* Mission · Vision · Values */}

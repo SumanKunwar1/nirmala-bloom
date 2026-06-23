@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Facebook, Twitter, Instagram } from "lucide-react";
+import { Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
+import { socialLinks } from "@/lib/constants";
 
 export function PersonCard({
   name,
@@ -19,9 +20,10 @@ export function PersonCard({
     .slice(0, 2);
 
   const socials = [
-    { Icon: Facebook, label: `${name} on Facebook` },
-    { Icon: Twitter, label: `${name} on Twitter` },
-    { Icon: Instagram, label: `${name} on Instagram` },
+    { Icon: Facebook, label: "Nirmala Foundation on Facebook", href: socialLinks.facebook },
+    { Icon: Instagram, label: "Nirmala Foundation on Instagram", href: socialLinks.instagram },
+    { Icon: Youtube, label: "Nirmala Foundation on YouTube", href: socialLinks.youtube },
+    { Icon: Linkedin, label: "Nirmala Foundation on LinkedIn", href: socialLinks.linkedin },
   ];
 
   return (
@@ -58,10 +60,12 @@ export function PersonCard({
         {/* Social row — pinned to bottom, divider keeps all cards aligned */}
         <div className="mt-auto w-full pt-6">
           <div className="border-t border-border pt-5 flex justify-center gap-2.5">
-            {socials.map(({ Icon, label }) => (
+            {socials.map(({ Icon, label, href }) => (
               <a
                 key={label}
-                href="#"
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={label}
                 className="grid h-9 w-9 place-items-center rounded-full border border-border text-primary transition-colors hover:bg-primary hover:text-white hover:border-primary"
               >

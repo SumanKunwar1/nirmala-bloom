@@ -21,6 +21,8 @@ export const imgs = {
   founderAction: U("1593113598332-cd288d649433", 1100),
   founderCommunity:
     "https://res.cloudinary.com/dihev9qxc/image/upload/v1782112730/WhatsApp_Image_2026-06-21_at_14.54.48_hz72m6.jpg",
+  founderAbout:
+    "https://res.cloudinary.com/dihev9qxc/image/upload/v1782229980/WhatsApp_Image_2026-06-21_at_14.34.00_uhye5p.jpg",
 
   // About — story / founder / team feel
   aboutStory: U("1573497019418-b400bb3ab074", 1100),

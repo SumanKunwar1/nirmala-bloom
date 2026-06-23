@@ -1,3 +1,10 @@
+export const socialLinks = {
+  facebook: "https://www.facebook.com/profile.php?id=61552918304022",
+  instagram: "https://www.instagram.com/nirmala_foundation.np?igsh=cDlic2w2cGdxZ2Y0",
+  youtube: "https://www.youtube.com/@NirmalaFoundationcares.org.np./featured",
+  linkedin: "https://www.linkedin.com/in/nirmalafoundation-6b2697312/",
+} as const;
+
 export const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
