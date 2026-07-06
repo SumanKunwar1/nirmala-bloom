@@ -4,7 +4,7 @@ export function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  align = "left",
+  align = "center",
   light = false,
 }: {
   eyebrow?: string;
@@ -13,19 +13,20 @@ export function SectionHeading({
   align?: "left" | "center";
   light?: boolean;
 }) {
+  const center = align === "center";
   return (
-    <div className={`mb-10 ${align === "center" ? "text-center mx-auto max-w-2xl" : "max-w-3xl"}`}>
+    <div className={`mb-12 ${center ? "text-center mx-auto max-w-2xl" : "max-w-3xl"}`}>
       {eyebrow && (
-        <div className={`mb-3 text-xs font-semibold tracking-[0.2em] uppercase ${light ? "text-accent-light" : "text-accent"}`}>
-          {eyebrow}
-        </div>
+        <div className={`eyebrow mb-4 ${light ? "text-accent-light" : "text-accent"}`}>{eyebrow}</div>
       )}
-      <h2 className={`heading-rule text-4xl md:text-5xl font-display font-semibold ${light ? "text-white [&]:text-white" : ""}`}
-          style={light ? { color: "#fff" } : undefined}>
+      <h2
+        className={`heading-rule ${center ? "is-center" : ""} text-3xl md:text-[2.75rem] md:leading-[1.1] font-display font-bold ${light ? "text-white" : "text-ink"}`}
+        style={light ? { color: "#fff" } : undefined}
+      >
         {title}
       </h2>
       {subtitle && (
-        <p className={`mt-5 text-lg leading-relaxed ${light ? "text-white/80" : "text-text/80"}`}>
+        <p className={`mt-6 text-lg leading-relaxed ${light ? "text-white/80" : "text-text/75"}`}>
           {subtitle}
         </p>
       )}

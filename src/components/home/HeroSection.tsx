@@ -1,140 +1,121 @@
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { Heart, ArrowRight, ShieldCheck } from "lucide-react";
+import { Heart, ArrowRight } from "lucide-react";
 import { imgs } from "@/lib/images";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay: 0.08 * i },
-  }),
-};
-
-const trust = [
-  { v: "1,200+", l: "Lives changed" },
-  { v: "8", l: "Active programs" },
-  { v: "15+", l: "Partner organisations" },
+const slides = [
+  {
+    image: imgs.founderCommunity,
+    eyebrow: "Nirmala Foundation · Nepal",
+    title: (
+      <>
+        More than support —<br />
+        we build <span className="text-accent-light">belonging.</span>
+      </>
+    ),
+    text: "Empowering communities, breaking barriers, and inspiring futures for people with disabilities across Nepal — through sport, the arts, education and mobility.",
+  },
+  {
+    image: imgs.heroAthlete,
+    eyebrow: "Adaptive Sports",
+    title: (
+      <>
+        Every person deserves<br />
+        a place to <span className="text-accent-light">play.</span>
+      </>
+    ),
+    text: "From wheelchair basketball to para-badminton, sport is how many Nepalis with disabilities step into public life for the first time.",
+  },
+  {
+    image: imgs.heroJoy,
+    eyebrow: "Inclusion is a right",
+    title: (
+      <>
+        Breaking barriers,<br />
+        <span className="text-accent-light">inspiring futures.</span>
+      </>
+    ),
+    text: "Globally, 1 in 6 people live with a disability. We build the pathways — mobility, education and health — that turn ability into opportunity.",
+  },
 ];
 
 export function HeroSection() {
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const t = setInterval(() => setI((p) => (p + 1) % slides.length), 6500);
+    return () => clearInterval(t);
+  }, [paused]);
+
+  const slide = slides[i];
+
   return (
-    <section className="relative overflow-hidden aurora-soft grain pt-32 md:pt-40 pb-20 md:pb-28">
-      <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 lg:gap-10 items-center">
-        {/* Mission-forward copy */}
-        <div className="lg:col-span-6">
+    <section
+      className="relative min-h-[92vh] flex items-end overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Full-bleed rotating photography */}
+      <div className="absolute inset-0">
+        <AnimatePresence mode="sync">
+          <motion.img
+            key={i}
+            src={slide.image}
+            alt=""
+            aria-hidden
+            initial={{ opacity: 0, scale: 1.08 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ opacity: { duration: 1.1 }, scale: { duration: 7, ease: "linear" } }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
+        <div className="absolute inset-0 hero-scrim" />
+      </div>
+
+      {/* Overlay content — centered, BlinkNow-style */}
+      <div className="relative z-10 mx-auto max-w-4xl w-full px-6 pb-20 md:pb-28 pt-32 text-center">
+        <AnimatePresence mode="wait">
           <motion.div
-            custom={0}
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="inline-flex items-center gap-2 rounded-full bg-white border border-border pl-2 pr-4 py-1.5 text-sm soft-shadow"
+            key={i}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-primary-pale text-primary">
-              <Heart className="h-3.5 w-3.5" />
-            </span>
-            <span className="text-text">Founded &amp; led by people with lived experience</span>
+            <div className="eyebrow text-accent-light mb-5">{slide.eyebrow}</div>
+            <h1 className="font-display font-extrabold text-white text-4xl sm:text-5xl md:text-[4.5rem] md:leading-[1.02] tracking-tight">
+              {slide.title}
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-white/85 max-w-2xl mx-auto leading-relaxed">
+              {slide.text}
+            </p>
           </motion.div>
+        </AnimatePresence>
 
-          <motion.h1
-            custom={1}
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="font-display text-[2.6rem] leading-[1.05] md:text-6xl md:leading-[1.04] tracking-tight text-ink mt-6"
-          >
-            Championing dignity, mobility &amp; <span className="gradient-text-warm">belonging</span> for people with disabilities across Nepal.
-          </motion.h1>
-
-          <motion.p
-            custom={2}
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="mt-6 text-lg md:text-xl text-text/80 max-w-xl leading-relaxed"
-          >
-            The Nirmala Foundation creates pathways to inclusion through sport, the arts,
-            education and mobility — so every person can take part, contribute and thrive.
-          </motion.p>
-
-          <motion.div
-            custom={3}
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="mt-9 flex flex-wrap items-center gap-4"
-          >
-            <Link
-              to="/donate"
-              className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 font-semibold text-white shadow-[0_18px_40px_-14px_rgba(217,115,43,0.7)] transition-all hover:-translate-y-0.5"
-            >
-              <Heart className="h-5 w-5" />
-              Donate now
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              to="/about"
-              className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-white px-7 py-4 font-semibold text-primary transition-colors hover:bg-primary-pale"
-            >
-              Our story
-            </Link>
-          </motion.div>
-
-          <motion.div
-            custom={4}
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="mt-10 flex flex-wrap gap-x-10 gap-y-4"
-          >
-            {trust.map((s) => (
-              <div key={s.l}>
-                <div className="font-mono-stat text-2xl md:text-3xl font-bold text-primary">{s.v}</div>
-                <div className="mt-0.5 text-xs uppercase tracking-[0.16em] text-text/55">{s.l}</div>
-              </div>
-            ))}
-          </motion.div>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+          <Link to="/donate" className="btn-pill btn-accent">
+            <Heart className="h-4 w-4" /> Donate Now
+          </Link>
+          <Link to="/programs" className="btn-pill btn-outline-light">
+            Explore Our Work <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        {/* Founder-forward imagery */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-          className="lg:col-span-6 relative"
-        >
-          <div className="relative mx-auto max-w-md lg:max-w-none">
-            <div className="photo-frame aspect-[4/5] md:aspect-[5/6]">
-              <img
-                src={imgs.founderPortrait}
-                alt="Nirmala Bhandari, founder of the Nirmala Foundation"
-                className="ken-burns"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
-              {/* Founder name plate */}
-              <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/95 backdrop-blur px-4 py-3 flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-accent/15 text-accent">
-                  <ShieldCheck className="h-4 w-4" />
-                </span>
-                <div className="leading-tight">
-                  <div className="font-display text-base font-semibold text-ink">Nirmala Bhandari</div>
-                  <div className="text-xs text-text/65">Founder &amp; Executive Director · Para-athlete</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Supporting image */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.55 }}
-              className="hidden md:block absolute -bottom-8 -left-8 w-52 photo-frame aspect-[4/3] ring-4 ring-background"
-            >
-              <img src={imgs.founderCommunity} alt="The Nirmala Foundation community together at an event" className="ken-burns" />
-            </motion.div>
-          </div>
-        </motion.div>
+        {/* Slide dots */}
+        <div className="mt-12 flex justify-center gap-2.5">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setI(idx)}
+              aria-label={`Slide ${idx + 1}`}
+              className={`h-2 rounded-full transition-all ${idx === i ? "w-9 bg-accent" : "w-2.5 bg-white/50 hover:bg-white/80"}`}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

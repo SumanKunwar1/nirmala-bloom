@@ -25,7 +25,7 @@ export function TestimonialsCarousel() {
       }}
     >
       <div className="mx-auto max-w-3xl px-6 text-center">
-        <div className="text-xs font-semibold tracking-[0.24em] uppercase text-accent mb-4">Voices of Belonging</div>
+        <div className="eyebrow mb-4">Faces of Nirmala</div>
         <svg className="mx-auto w-10 h-10 text-accent opacity-80" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <path d="M9.6 8c-3 0-5.6 2.6-5.6 5.6V20h6.4v-6.4H7.2c0-1.4 1-2.4 2.4-2.4V8zm9.2 0c-3 0-5.6 2.6-5.6 5.6V20h6.4v-6.4h-3.2c0-1.4 1-2.4 2.4-2.4V8z" />
         </svg>
@@ -37,7 +37,7 @@ export function TestimonialsCarousel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-              className="font-display italic text-2xl md:text-3xl text-ink leading-relaxed"
+              className="font-display font-semibold text-2xl md:text-[2rem] md:leading-snug text-ink"
             >
               &ldquo;{testimonials[i].quote}&rdquo;
               <footer className="mt-7 not-italic flex flex-col items-center gap-2">

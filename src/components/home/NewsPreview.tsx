@@ -8,18 +8,14 @@ import { containerVariants, itemVariants } from "@/components/shared/ScrollRevea
 export function NewsPreview() {
   const recent = newsPosts.slice(0, 3);
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-primary-pale/40">
+    <section className="py-24 md:py-28 bg-gradient-to-b from-white to-primary-pale/40">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
-          <SectionHeading
-            eyebrow="Latest Stories"
-            title="News from the field"
-            subtitle="Voices, victories, and quiet moments from across our programs."
-          />
-          <Link to="/news" className="text-primary font-medium hover:underline underline-offset-4">
-            All news →
-          </Link>
-        </div>
+        <SectionHeading
+          align="center"
+          eyebrow="Latest Stories"
+          title="News from the field"
+          subtitle="Voices, victories, and quiet moments from across our programs."
+        />
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -33,6 +29,11 @@ export function NewsPreview() {
             </motion.div>
           ))}
         </motion.div>
+        <div className="mt-12 text-center">
+          <Link to="/news" className="btn-pill btn-outline">
+            All News <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );

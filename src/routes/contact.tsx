@@ -32,7 +32,8 @@ function ContactPage() {
           className="lg:col-span-3 rounded-3xl bg-white border border-border p-8 soft-shadow space-y-5"
           onSubmit={(e) => e.preventDefault()}
         >
-          <h2 className="font-display text-2xl font-semibold heading-rule mb-2">Send a message</h2>
+          <div className="eyebrow mb-2">Send a Message</div>
+          <h2 className="font-display text-2xl font-bold heading-rule mb-2">We&apos;d love to hear from you</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             <Input placeholder="Full name" />
             <Input placeholder="Email" type="email" />
@@ -50,8 +51,8 @@ function ContactPage() {
             rows={6}
             className="w-full rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary"
           />
-          <button className="bg-accent text-white rounded-full px-8 py-3 font-semibold hover:-translate-y-0.5 transition-transform shadow-[0_10px_24px_-10px_rgba(217,115,43,0.7)]">
-            Send message →
+          <button className="btn-pill btn-accent">
+            Send Message →
           </button>
         </form>
 

@@ -1,54 +1,48 @@
 import { motion } from "framer-motion";
-import { Target, Eye, HeartHandshake } from "lucide-react";
+import { HeartHandshake, Sparkles, Users } from "lucide-react";
 
-const pillars = [
-  {
-    icon: Target,
-    title: "Our mission",
-    text: "To empower people with disabilities in Nepal through inclusive sport, the arts, education and mobility — removing the barriers that keep them from full participation.",
-  },
-  {
-    icon: Eye,
-    title: "Our vision",
-    text: "A Nepal where every person — regardless of ability — belongs, contributes and thrives, with their rights and dignity upheld in every community.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Our values",
-    text: "Dignity, accessibility, joy and lived experience guide every decision. The people we serve help shape the work we do.",
-  },
+const values = [
+  { icon: HeartHandshake, label: "Dignity", text: "Every person, every ability — treated with respect." },
+  { icon: Users, label: "Inclusion", text: "Built into every programme, not added as an afterthought." },
+  { icon: Sparkles, label: "Joy", text: "Belonging that feels alive, celebrated and shared." },
 ];
 
 export function MissionVision() {
   return (
     <section className="relative py-24 md:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="max-w-3xl">
-          <div className="mb-3 text-xs font-semibold tracking-[0.2em] uppercase text-accent">What guides us</div>
-          <h2 className="font-display text-4xl md:text-5xl font-semibold text-ink leading-tight">
-            A human-rights approach, shaped by lived experience.
-          </h2>
-          <p className="mt-5 text-lg text-text/80 leading-relaxed">
-            We don&apos;t decide what inclusion should look like from the outside. The people we
-            serve sit at the centre of every programme we run.
-          </p>
-        </div>
+      <div className="mx-auto max-w-3xl px-6 text-center">
+        <div className="eyebrow mb-5">Our Mission</div>
+        <h2 className="font-display text-3xl md:text-[2.75rem] md:leading-[1.15] font-bold text-ink">
+          Empowering communities, breaking barriers, inspiring futures.
+        </h2>
+        <p className="mt-6 text-lg md:text-xl text-text/75 leading-relaxed">
+          At Nirmala Foundation we strive to break barriers and promote inclusion, ensuring equal
+          opportunities for all. Through inclusive sport, the arts, education and mobility — and
+          shaped by people with lived experience — we build a Nepal where everyone can take part,
+          contribute and thrive.
+        </p>
+      </div>
 
-        <div className="mt-14 grid md:grid-cols-3 gap-6">
-          {pillars.map((p, i) => (
+      {/* Our Values — icon row */}
+      <div className="mx-auto max-w-5xl px-6 mt-16 md:mt-20">
+        <div className="text-center mb-10">
+          <div className="eyebrow">Our Values</div>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-8 md:gap-10">
+          {values.map((v, i) => (
             <motion.div
-              key={p.title}
-              initial={{ opacity: 0, y: 24 }}
+              key={v.label}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="relative h-full rounded-3xl bg-card border border-border p-8 soft-shadow lift"
+              className="text-center"
             >
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-pale text-primary mb-5">
-                <p.icon className="h-7 w-7" />
+              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-accent-light text-accent mb-5">
+                <v.icon className="h-7 w-7" />
               </span>
-              <h3 className="font-display text-2xl font-semibold text-ink mb-3">{p.title}</h3>
-              <p className="text-text/80 leading-relaxed">{p.text}</p>
+              <h3 className="font-display text-lg font-bold text-ink mb-2">{v.label}</h3>
+              <p className="text-text/70 text-[15px] leading-relaxed max-w-xs mx-auto">{v.text}</p>
             </motion.div>
           ))}
         </div>

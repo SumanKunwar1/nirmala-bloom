@@ -1,15 +1,7 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Scale, Users, Vote, MapPin } from "lucide-react";
 
 type Stat = { value: string; label: string };
-
-/** Rights-based value strip — inspired by CIL-Kathmandu's advocacy framing. */
-const rights = [
-  { icon: Scale, label: "Dignity", text: "The right to live with dignity." },
-  { icon: Users, label: "Participation", text: "The right to take part in every aspect of life." },
-  { icon: Vote, label: "Self-determination", text: "The right to make our own decisions." },
-];
 
 export function PageHero({
   title,
@@ -18,7 +10,6 @@ export function PageHero({
   imageAlt = "",
   eyebrow,
   stats,
-  showValues = true,
 }: {
   title: ReactNode;
   subtitle?: string;
@@ -28,83 +19,46 @@ export function PageHero({
   imageAlt?: string;
   eyebrow?: string;
   stats?: Stat[];
+  /** Deprecated — the values band is no longer rendered on inner heroes. */
   showValues?: boolean;
 }) {
   return (
-    <section className="relative overflow-hidden aurora-soft grain pt-28 md:pt-36 pb-14 md:pb-20">
-      <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10 items-center">
+    <section className="relative overflow-hidden min-h-[54vh] md:min-h-[62vh] flex items-end">
+      {/* Full-bleed photography */}
+      <div className="absolute inset-0">
+        {image && (
+          <img src={image} alt={imageAlt} className="h-full w-full object-cover ken-burns" />
+        )}
+        <div className="absolute inset-0 hero-scrim" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-7xl w-full px-6 pb-14 md:pb-20 pt-32">
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="lg:col-span-7"
+          className="max-w-3xl"
         >
-          {eyebrow && (
-            <div className="inline-flex items-center gap-2 rounded-full bg-white border border-border px-4 py-1.5 mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary soft-shadow">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-              {eyebrow}
-            </div>
-          )}
-          <h1 className="font-display font-semibold text-4xl md:text-6xl leading-[1.05] tracking-tight text-ink">
+          {eyebrow && <div className="eyebrow text-accent-light mb-4">{eyebrow}</div>}
+          <h1 className="font-display font-extrabold text-white text-4xl md:text-6xl leading-[1.05] tracking-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-5 text-lg md:text-xl text-text/80 max-w-2xl leading-relaxed">{subtitle}</p>
+            <p className="mt-5 text-lg md:text-xl text-white/85 max-w-2xl leading-relaxed">{subtitle}</p>
           )}
 
           {stats && stats.length > 0 && (
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
               {stats.map((s) => (
-                <div key={s.label} className="rounded-2xl bg-card border border-border px-4 py-2.5 soft-shadow">
-                  <div className="font-mono-stat font-bold text-primary text-lg leading-none">{s.value}</div>
-                  <div className="text-[11px] uppercase tracking-wider text-text/55 mt-1">{s.label}</div>
+                <div key={s.label}>
+                  <div className="font-mono-stat font-bold text-white text-2xl md:text-3xl leading-none">{s.value}</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/65 mt-1.5">{s.label}</div>
                 </div>
               ))}
             </div>
           )}
         </motion.div>
-
-        {image && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, ease: "easeOut", delay: 0.15 }}
-            className="lg:col-span-5 relative h-[260px] sm:h-[320px] md:h-[400px]"
-          >
-            <div className="photo-frame absolute inset-0">
-              <img src={image} alt={imageAlt} loading="lazy" className="ken-burns" />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/95 backdrop-blur px-3.5 py-1.5 text-xs font-medium text-ink">
-                <MapPin className="h-3.5 w-3.5 text-accent" />
-                Kathmandu, Nepal
-              </div>
-            </div>
-          </motion.div>
-        )}
       </div>
-
-      {showValues && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.7 }}
-          className="relative mx-auto max-w-7xl px-6 mt-12 md:mt-16"
-        >
-          <div className="rounded-3xl bg-card border border-border px-6 py-5 grid sm:grid-cols-3 gap-5 soft-shadow">
-            {rights.map((v) => (
-              <div key={v.label} className="flex items-center gap-3">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary-pale text-primary">
-                  <v.icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <div className="font-display text-base font-semibold text-ink leading-tight">{v.label}</div>
-                  <div className="text-xs text-text/65 leading-snug">{v.text}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
     </section>
   );
 }

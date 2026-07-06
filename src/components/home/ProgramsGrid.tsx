@@ -7,21 +7,14 @@ import { containerVariants, itemVariants } from "@/components/shared/ScrollRevea
 
 export function ProgramsGrid() {
   return (
-    <section className="py-24 relative">
+    <section className="py-24 md:py-28 relative">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="flex items-end justify-between flex-wrap gap-6 mb-12">
-          <SectionHeading
-            eyebrow="Our work"
-            title="The projects we run"
-            subtitle="Six interconnected pathways to inclusion — from the basketball court to the classroom and beyond."
-          />
-          <Link
-            to="/programs"
-            className="text-primary font-medium text-sm hover:underline underline-offset-4 hidden md:inline-block"
-          >
-            View all programs →
-          </Link>
-        </div>
+        <SectionHeading
+          align="center"
+          eyebrow="Our Work"
+          title="Pathways to inclusion"
+          subtitle="Six interconnected programs — from the basketball court to the classroom and beyond — that turn ability into opportunity."
+        />
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -35,6 +28,11 @@ export function ProgramsGrid() {
             </motion.div>
           ))}
         </motion.div>
+        <div className="mt-12 text-center">
+          <Link to="/programs" className="btn-pill btn-outline">
+            View All Programs <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -35,7 +35,7 @@ export function DonateCtaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/20 px-4 py-1.5 text-xs uppercase tracking-[0.18em] mb-6"
+          className="inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/20 px-4 py-1.5 eyebrow text-accent-light mb-6"
         >
           <Heart className="h-3.5 w-3.5" /> Every rupee becomes belonging
         </motion.div>
@@ -45,7 +45,7 @@ export function DonateCtaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="font-display text-4xl md:text-5xl font-semibold"
+          className="font-display text-4xl md:text-5xl font-extrabold"
           style={{ color: "#fff" }}
         >
           Give today. Change a life.
@@ -87,10 +87,7 @@ export function DonateCtaSection() {
         )}
 
         <div className="mt-9 flex flex-col items-center gap-4">
-          <Link
-            to="/donate"
-            className="group inline-flex items-center gap-2 rounded-full bg-accent px-10 py-5 text-lg font-semibold text-white shadow-[0_22px_50px_-14px_rgba(217,115,43,0.7)] transition-transform hover:-translate-y-0.5"
-          >
+          <Link to="/donate" className="group btn-pill btn-accent !px-10 !py-5 text-sm">
             <Heart className="h-5 w-5" />
             Donate via eSewa / Khalti
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

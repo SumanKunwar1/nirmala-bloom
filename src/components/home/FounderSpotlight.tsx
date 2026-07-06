@@ -13,7 +13,7 @@ export function FounderSpotlight() {
   return (
     <section className="relative overflow-hidden py-24 md:py-28 aurora-deep grain">
       <div className="relative mx-auto max-w-6xl px-6">
-        <div className="mb-3 text-xs font-semibold tracking-[0.2em] uppercase text-accent">Meet our founder</div>
+        <div className="eyebrow text-accent-light mb-4">Meet Our Founder</div>
 
         {/* Full-width hero image of Nirmala */}
         <motion.div
@@ -55,7 +55,7 @@ export function FounderSpotlight() {
             <figure className="mt-8 border-l-4 border-accent pl-6">
               <Quote className="h-7 w-7 text-accent" />
               <blockquote
-                className="mt-2 font-display italic text-xl md:text-2xl leading-relaxed"
+                className="mt-2 font-display font-semibold text-xl md:text-2xl leading-relaxed"
                 style={{ color: "#fff" }}
               >
                 We don&apos;t ask for permission to belong. We build belonging — every day, in every community.
@@ -67,9 +67,9 @@ export function FounderSpotlight() {
 
             <Link
               to="/about"
-              className="group mt-9 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-primary transition-all hover:-translate-y-0.5"
+              className="group btn-pill mt-9 bg-white text-primary hover:bg-white"
             >
-              Read Nirmala&apos;s full story
+              Read Nirmala&apos;s Story
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>

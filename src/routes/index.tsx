@@ -18,10 +18,10 @@ function Index() {
     <>
       <HeroSection />
       <MissionVision />
-      <RightsBand />
-      <FounderSpotlight />
-      <ImpactCounters />
       <ProgramsGrid />
+      <RightsBand />
+      <ImpactCounters />
+      <FounderSpotlight />
       <TestimonialsCarousel />
       <DonateCtaSection />
       <NewsPreview />

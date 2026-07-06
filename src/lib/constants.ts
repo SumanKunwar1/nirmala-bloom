@@ -26,10 +26,10 @@ export const programs = [
 ];
 
 export const impactStats = [
-  { label: "Beneficiaries Reached", value: 1200, suffix: "+" },
-  { label: "Active Programs", value: 8, suffix: "" },
-  { label: "Partner Organizations", value: 15, suffix: "+" },
-  { label: "Years of Impact", value: 2, suffix: "+" },
+  { label: "Children Reached", value: 500, suffix: "+" },
+  { label: "Schools Reached", value: 7, suffix: "" },
+  { label: "Partner Organizations", value: 5, suffix: "+" },
+  { label: "Disability Types Served", value: 6, suffix: "" },
 ];
 
 export type DonationCampaign = {
