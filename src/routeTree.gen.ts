@@ -18,6 +18,9 @@ import { Route as DonateRouteImport } from './routes/donate'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProgramsIndexRouteImport } from './routes/programs.index'
+import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as DonateIndexRouteImport } from './routes/donate.index'
 import { Route as ProgramsSlugRouteImport } from './routes/programs.$slug'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as DonateSlugRouteImport } from './routes/donate.$slug'
@@ -67,6 +70,21 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProgramsIndexRoute = ProgramsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProgramsRoute,
+} as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => NewsRoute,
+} as any)
+const DonateIndexRoute = DonateIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DonateRoute,
+} as any)
 const ProgramsSlugRoute = ProgramsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -96,20 +114,23 @@ export interface FileRoutesByFullPath {
   '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
+  '/donate/': typeof DonateIndexRoute
+  '/news/': typeof NewsIndexRoute
+  '/programs/': typeof ProgramsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/donate': typeof DonateRouteWithChildren
   '/gallery': typeof GalleryRoute
-  '/news': typeof NewsRouteWithChildren
   '/partners': typeof PartnersRoute
-  '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
+  '/donate': typeof DonateIndexRoute
+  '/news': typeof NewsIndexRoute
+  '/programs': typeof ProgramsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +146,9 @@ export interface FileRoutesById {
   '/donate/$slug': typeof DonateSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
+  '/donate/': typeof DonateIndexRoute
+  '/news/': typeof NewsIndexRoute
+  '/programs/': typeof ProgramsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,20 +165,23 @@ export interface FileRouteTypes {
     | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
+    | '/donate/'
+    | '/news/'
+    | '/programs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
-    | '/donate'
     | '/gallery'
-    | '/news'
     | '/partners'
-    | '/programs'
     | '/resources'
     | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
+    | '/donate'
+    | '/news'
+    | '/programs'
   id:
     | '__root__'
     | '/'
@@ -169,6 +196,9 @@ export interface FileRouteTypes {
     | '/donate/$slug'
     | '/news/$slug'
     | '/programs/$slug'
+    | '/donate/'
+    | '/news/'
+    | '/programs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -248,6 +278,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/programs/': {
+      id: '/programs/'
+      path: '/'
+      fullPath: '/programs/'
+      preLoaderRoute: typeof ProgramsIndexRouteImport
+      parentRoute: typeof ProgramsRoute
+    }
+    '/news/': {
+      id: '/news/'
+      path: '/'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof NewsRoute
+    }
+    '/donate/': {
+      id: '/donate/'
+      path: '/'
+      fullPath: '/donate/'
+      preLoaderRoute: typeof DonateIndexRouteImport
+      parentRoute: typeof DonateRoute
+    }
     '/programs/$slug': {
       id: '/programs/$slug'
       path: '/$slug'
@@ -274,10 +325,12 @@ declare module '@tanstack/react-router' {
 
 interface DonateRouteChildren {
   DonateSlugRoute: typeof DonateSlugRoute
+  DonateIndexRoute: typeof DonateIndexRoute
 }
 
 const DonateRouteChildren: DonateRouteChildren = {
   DonateSlugRoute: DonateSlugRoute,
+  DonateIndexRoute: DonateIndexRoute,
 }
 
 const DonateRouteWithChildren =
@@ -285,20 +338,24 @@ const DonateRouteWithChildren =
 
 interface NewsRouteChildren {
   NewsSlugRoute: typeof NewsSlugRoute
+  NewsIndexRoute: typeof NewsIndexRoute
 }
 
 const NewsRouteChildren: NewsRouteChildren = {
   NewsSlugRoute: NewsSlugRoute,
+  NewsIndexRoute: NewsIndexRoute,
 }
 
 const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
 
 interface ProgramsRouteChildren {
   ProgramsSlugRoute: typeof ProgramsSlugRoute
+  ProgramsIndexRoute: typeof ProgramsIndexRoute
 }
 
 const ProgramsRouteChildren: ProgramsRouteChildren = {
   ProgramsSlugRoute: ProgramsSlugRoute,
+  ProgramsIndexRoute: ProgramsIndexRoute,
 }
 
 const ProgramsRouteWithChildren = ProgramsRoute._addFileChildren(

@@ -81,6 +81,58 @@ export const programImages: Record<string, string> = {
   "community-travel": imgs.programCommunityTravel,
 };
 
+/** A small set of gallery photos per program slug for the detail page. */
+export const programGallery: Record<string, string[]> = {
+  "adaptive-sports": [
+    U("1593113598332-cd288d649433", 700),
+    U("1542751371-adc38448a05e", 700),
+    U("1571019613454-1cb2f99b2d8b", 700),
+    U("1546519638-68e109acd27d", 700),
+    U("1626284800725-30c4e6cfa39d", 700),
+    U("1574623452334-1e0ac2b3ccb4", 700),
+  ],
+  "inclusive-arts": [
+    U("1452860606245-08befc0ff44b", 700),
+    U("1513475382585-d06e58bcb0e0", 700),
+    U("1499892477393-f675706cbfac", 700),
+    U("1560421683-6856ea585c78", 700),
+    U("1547891654-e66ed7ebb968", 700),
+    U("1541961017774-22349e4a1262", 700),
+  ],
+  "education": [
+    U("1497486751825-1233686d5d80", 700),
+    U("1503676260728-1c00da094a0b", 700),
+    U("1509062522246-3755977927d7", 700),
+    U("1524995997946-a1c2e315a42f", 700),
+    U("1580582932707-520aed937b7b", 700),
+    U("1427504494785-3a9ca7044f45", 700),
+  ],
+  "mobility-access": [
+    U("1559757175-5700dde675bc", 700),
+    U("1576765608535-5f04d1e3f289", 700),
+    U("1584515933487-779824d29309", 700),
+    U("1519494026892-80bbd2d6fd0d", 700),
+    U("1454165804606-c3d57bc86b40", 700),
+    U("1488521787991-ed7bbaae773c", 700),
+  ],
+  "health-wellness": [
+    U("1576091160550-2173dba999ef", 700),
+    U("1505751172876-fa1923c5c528", 700),
+    U("1545389336-cf090694435e", 700),
+    U("1544367567-0f2fcb009e0b", 700),
+    U("1571019614242-c5c5dee9f50b", 700),
+    U("1518241353330-0f7941c2d9b5", 700),
+  ],
+  "community-travel": [
+    U("1488521787991-ed7bbaae773c", 700),
+    U("1544735716-392fe2489ffa", 700),
+    U("1464822759023-fed622ff2c3b", 700),
+    U("1506905925346-21bda4d32df4", 700),
+    U("1519681393784-d120267933ba", 700),
+    U("1476514525535-07fb3b4ae5f1", 700),
+  ],
+};
+
 export const newsImages: Record<string, string> = {
   "women-amputee-football-2025": imgs.newsAmputeeFootball,
   "d30-honoree-2025": imgs.newsD30,
