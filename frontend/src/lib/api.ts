@@ -27,6 +27,18 @@ export function setToken(token: string | null) {
   }
 }
 
+/**
+ * Mongo timestamps, present on every record the API returns.
+ *
+ * Optional because the admin store seeds itself with local fallback content
+ * so public pages render before the first fetch resolves — those seeded
+ * records have no server timestamps until the real data replaces them.
+ */
+export type Stamped = {
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export class ApiError extends Error {
   status: number;
   data: unknown;

@@ -33,14 +33,34 @@ app.use(
   }),
 );
 
-// Body parsing (large limit to allow base64 image payloads from the admin)
-app.use(express.json({ limit: "15mb" }));
+// Body parsing (large limit to allow base64 image payloads from the admin).
+// `verify` stashes the untouched body so payment webhooks can validate their
+// HMAC signature — which is computed over the exact bytes the bank sent.
+app.use(
+  express.json({
+    limit: "15mb",
+    verify(req, res, buf) {
+      if (req.originalUrl.includes("/payments/webhook/")) req.rawBody = buf.toString("utf8");
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 app.use(cookieParser());
 
 // Sanitize against NoSQL injection & HTTP param pollution
 app.use(mongoSanitize());
 app.use(hpp());
+
+// The mock checkout page is server-rendered HTML with inline <style>; helmet's
+// default CSP blocks that. Scoped to the one route so the API keeps its headers.
+app.use(`${config.apiPrefix}/payments/mock`, helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    scriptSrc: ["'none'"],
+    imgSrc: ["'self'", "data:"],
+  },
+}));
 
 // Gzip responses
 app.use(compression());

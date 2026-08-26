@@ -6,6 +6,8 @@ import submissionRoutes from "./submission.routes.js";
 import donationRoutes from "./donation.routes.js";
 import settingRoutes from "./setting.routes.js";
 import newsletterRoutes from "./newsletter.routes.js";
+import campaignRoutes from "./campaign.routes.js";
+import paymentRoutes from "./payment.routes.js";
 
 import HeroSlide from "../models/HeroSlide.js";
 import ImpactStat from "../models/ImpactStat.js";
@@ -41,10 +43,14 @@ router.use("/resources", crudRouter(Resource));
 router.use("/gallery-albums", crudRouter(GalleryAlbum, { hasSlug: true }));
 router.use("/partners", crudRouter(Partner));
 
+// Fundraising
+router.use("/campaigns", campaignRoutes);
+router.use("/donations", donationRoutes);
+router.use("/payments", paymentRoutes);
+
 // Singletons + inbox + forms
 router.use("/settings", settingRoutes);
 router.use("/submissions", submissionRoutes);
-router.use("/donations", donationRoutes);
 router.use("/newsletter", newsletterRoutes);
 
 export default router;

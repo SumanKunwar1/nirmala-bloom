@@ -124,13 +124,26 @@ export const settings = {
   },
 };
 
+export { campaigns } from "./campaigns.js";
+
+/**
+ * Sample donation records.
+ *
+ * `baseAmount` is set explicitly because insertMany() bypasses the model's
+ * pre-save hook. Foreign-currency rows show the multi-currency path Global
+ * IME's international acquiring enables.
+ */
 export const donations = [
-  { donor: "Ram Shrestha", email: "ram.s@example.com", amount: 5000, campaignSlug: "wheelchair-fund", campaignTitle: "Wheelchair Fund", method: "eSewa", status: "completed", anonymous: false, message: "Keep up the great work!" },
-  { donor: "Anonymous", email: "hidden@example.com", amount: 25000, campaignSlug: "wheelchair-fund", campaignTitle: "Wheelchair Fund", method: "Bank transfer", status: "completed", anonymous: true },
-  { donor: "Sarah Mitchell", email: "sarah.m@example.org", amount: 10000, campaignSlug: "school-supplies", campaignTitle: "School Supplies", method: "Card", status: "completed", anonymous: false },
-  { donor: "Kavita Joshi", email: "kavita.j@example.com", amount: 50000, campaignSlug: "general-fund", campaignTitle: "General Fund", method: "Bank transfer", status: "pending", anonymous: false },
-  { donor: "Daniel Roberts", email: "d.roberts@example.org", amount: 8000, campaignSlug: "rural-health-medicines", campaignTitle: "Rural Health Medicines", method: "Card", status: "completed", anonymous: false },
+  { donor: "Ram Shrestha", email: "ram.s@example.com", amount: 5000, currency: "NPR", baseAmount: 5000, fxRate: 1, campaignSlug: "wheelchair-fund", campaignTitle: "Wheelchair Fund", gateway: "globalime", method: "Global IME · Mobile Banking", status: "completed", anonymous: false, message: "Keep up the great work!", source: "web", receiptNo: "NF-2025-000001", completedAt: new Date("2025-11-14T04:20:00Z") },
+  { donor: "Anonymous", email: "hidden@example.com", amount: 25000, currency: "NPR", baseAmount: 25000, fxRate: 1, campaignSlug: "wheelchair-fund", campaignTitle: "Wheelchair Fund", gateway: "manual", method: "Bank transfer", status: "completed", anonymous: true, source: "manual", receiptNo: "NF-2025-000002", completedAt: new Date("2025-12-02T09:05:00Z") },
+  { donor: "Sarah Mitchell", email: "sarah.m@example.org", amount: 150, currency: "USD", baseAmount: 21225, fxRate: 141.5, country: "United States", campaignSlug: "school-supplies", campaignTitle: "School Supplies", gateway: "globalime", method: "Global IME · VISA ****4242", status: "completed", anonymous: false, source: "web", receiptNo: "NF-2025-000003", completedAt: new Date("2026-01-19T16:40:00Z") },
+  { donor: "Kavita Joshi", email: "kavita.j@example.com", amount: 50000, currency: "NPR", baseAmount: 50000, fxRate: 1, campaignSlug: "general-fund", campaignTitle: "General Fund", gateway: "manual", method: "Bank transfer", status: "pending", anonymous: false, source: "web" },
+  { donor: "Daniel Roberts", email: "d.roberts@example.org", amount: 60, currency: "GBP", baseAmount: 10704, fxRate: 178.4, country: "United Kingdom", campaignSlug: "rural-health-medicines", campaignTitle: "Rural Health Medicines", gateway: "globalime", method: "Global IME · MASTERCARD ****8891", status: "completed", anonymous: false, source: "web", receiptNo: "NF-2026-000001", completedAt: new Date("2026-03-07T11:15:00Z") },
+  { donor: "Prakash Adhikari", email: "prakash.a@example.com", amount: 12000, currency: "NPR", baseAmount: 12000, fxRate: 1, campaignSlug: "sports-equipment", campaignTitle: "Sports Equipment", gateway: "globalime", method: "Global IME · Internet Banking", status: "completed", anonymous: false, recurring: true, frequency: "monthly", message: "For the basketball squad.", source: "web", receiptNo: "NF-2026-000002", completedAt: new Date("2026-06-11T06:30:00Z") },
 ];
+
+/** Highest receipt sequence used per year above — keeps live numbering gapless. */
+export const receiptCounters = { 2025: 3, 2026: 2 };
 
 export const submissions = [
   { name: "Aarati Koirala", email: "aarati.k@example.com", phone: "+977 9812345678", subject: "Volunteer", message: "I'd love to volunteer at your rural health camps. How can I get involved?", read: false },

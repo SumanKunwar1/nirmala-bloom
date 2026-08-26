@@ -3,7 +3,10 @@ import ApiError from "../utils/ApiError.js";
 import { success, created } from "../utils/ApiResponse.js";
 
 /** Fields that are safe to filter on via query string. */
-const FILTERABLE = ["published", "category", "status", "campaignSlug", "featured", "read", "region", "type"];
+const FILTERABLE = [
+  "published", "category", "status", "campaignSlug", "featured", "read", "region", "type",
+  "gateway", "currency", "needsReview", "source", "recurring", "active", "urgent",
+];
 
 /**
  * GET /  — list with optional filtering, full-text search (?q=),

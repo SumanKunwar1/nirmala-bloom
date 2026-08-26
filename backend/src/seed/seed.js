@@ -19,12 +19,17 @@ import Setting from "../models/Setting.js";
 import Donation from "../models/Donation.js";
 import Submission from "../models/Submission.js";
 import Subscriber from "../models/Subscriber.js";
+import Campaign from "../models/Campaign.js";
+import Payment from "../models/Payment.js";
+import Counter from "../models/Counter.js";
+import { syncAllCampaignTotals } from "../services/donation.service.js";
 
 import * as data from "./data.js";
 
 const contentModels = [
   HeroSlide, ImpactStat, Testimonial, Program, TeamMember, Milestone,
-  Story, InvolveWay, Resource, GalleryAlbum, Partner, Setting, Donation, Submission, Subscriber,
+  Story, InvolveWay, Resource, GalleryAlbum, Partner, Setting, Campaign, Donation, Payment,
+  Counter, Submission, Subscriber,
 ];
 
 async function destroy() {
@@ -61,7 +66,16 @@ async function seed() {
   await Resource.insertMany(data.resources);
   await GalleryAlbum.insertMany(data.galleryAlbums);
   await Partner.insertMany(data.partners);
+  await Campaign.insertMany(data.campaigns);
   await Donation.insertMany(data.donations);
+
+  // Continue receipt numbering from the seeded records rather than restarting
+  // at 1 — a duplicate receipt number is an accounting problem, not a bug.
+  await Counter.bulkWrite(
+    Object.entries(data.receiptCounters).map(([year, seq]) => ({
+      updateOne: { filter: { _id: `receipt:${year}` }, update: { seq }, upsert: true },
+    })),
+  );
   await Submission.insertMany(data.submissions);
   await Subscriber.insertMany(data.subscribers);
 
@@ -70,6 +84,10 @@ async function seed() {
       updateOne: { filter: { key }, update: { data: value }, upsert: true },
     })),
   );
+
+  // Derive each campaign's online totals from the donations just inserted.
+  const synced = await syncAllCampaignTotals();
+  logger.info(`Campaign totals synced → ${synced} campaign(s)`);
 
   logger.info("✅ Seed complete.");
 }

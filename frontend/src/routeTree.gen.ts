@@ -25,18 +25,21 @@ import { Route as DonateIndexRouteImport } from './routes/donate.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ProgramsSlugRouteImport } from './routes/programs.$slug'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
+import { Route as DonateThankYouRouteImport } from './routes/donate.thank-you'
 import { Route as DonateSlugRouteImport } from './routes/donate.$slug'
 import { Route as AdminStoriesRouteImport } from './routes/admin/stories'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminResourcesRouteImport } from './routes/admin/resources'
 import { Route as AdminProgramsRouteImport } from './routes/admin/programs'
 import { Route as AdminPartnersRouteImport } from './routes/admin/partners'
+import { Route as AdminNewsletterRouteImport } from './routes/admin/newsletter'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminHomeRouteImport } from './routes/admin/home'
 import { Route as AdminGetInvolvedRouteImport } from './routes/admin/get-involved'
 import { Route as AdminGalleryRouteImport } from './routes/admin/gallery'
 import { Route as AdminDonationsRouteImport } from './routes/admin/donations'
 import { Route as AdminContactRouteImport } from './routes/admin/contact'
+import { Route as AdminCampaignsRouteImport } from './routes/admin/campaigns'
 import { Route as AdminAboutRouteImport } from './routes/admin/about'
 
 const ResourcesRoute = ResourcesRouteImport.update({
@@ -119,6 +122,11 @@ const NewsSlugRoute = NewsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => NewsRoute,
 } as any)
+const DonateThankYouRoute = DonateThankYouRouteImport.update({
+  id: '/thank-you',
+  path: '/thank-you',
+  getParentRoute: () => DonateRoute,
+} as any)
 const DonateSlugRoute = DonateSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -147,6 +155,11 @@ const AdminProgramsRoute = AdminProgramsRouteImport.update({
 const AdminPartnersRoute = AdminPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminNewsletterRoute = AdminNewsletterRouteImport.update({
+  id: '/newsletter',
+  path: '/newsletter',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -179,6 +192,11 @@ const AdminContactRoute = AdminContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCampaignsRoute = AdminCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminAboutRoute = AdminAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -197,18 +215,21 @@ export interface FileRoutesByFullPath {
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/admin/about': typeof AdminAboutRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/contact': typeof AdminContactRoute
   '/admin/donations': typeof AdminDonationsRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/get-involved': typeof AdminGetInvolvedRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/stories': typeof AdminStoriesRoute
   '/donate/$slug': typeof DonateSlugRoute
+  '/donate/thank-you': typeof DonateThankYouRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -224,18 +245,21 @@ export interface FileRoutesByTo {
   '/partners': typeof PartnersRoute
   '/resources': typeof ResourcesRoute
   '/admin/about': typeof AdminAboutRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/contact': typeof AdminContactRoute
   '/admin/donations': typeof AdminDonationsRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/get-involved': typeof AdminGetInvolvedRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/stories': typeof AdminStoriesRoute
   '/donate/$slug': typeof DonateSlugRoute
+  '/donate/thank-you': typeof DonateThankYouRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -256,18 +280,21 @@ export interface FileRoutesById {
   '/programs': typeof ProgramsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/admin/about': typeof AdminAboutRoute
+  '/admin/campaigns': typeof AdminCampaignsRoute
   '/admin/contact': typeof AdminContactRoute
   '/admin/donations': typeof AdminDonationsRoute
   '/admin/gallery': typeof AdminGalleryRoute
   '/admin/get-involved': typeof AdminGetInvolvedRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/programs': typeof AdminProgramsRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/stories': typeof AdminStoriesRoute
   '/donate/$slug': typeof DonateSlugRoute
+  '/donate/thank-you': typeof DonateThankYouRoute
   '/news/$slug': typeof NewsSlugRoute
   '/programs/$slug': typeof ProgramsSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -289,18 +316,21 @@ export interface FileRouteTypes {
     | '/programs'
     | '/resources'
     | '/admin/about'
+    | '/admin/campaigns'
     | '/admin/contact'
     | '/admin/donations'
     | '/admin/gallery'
     | '/admin/get-involved'
     | '/admin/home'
     | '/admin/login'
+    | '/admin/newsletter'
     | '/admin/partners'
     | '/admin/programs'
     | '/admin/resources'
     | '/admin/settings'
     | '/admin/stories'
     | '/donate/$slug'
+    | '/donate/thank-you'
     | '/news/$slug'
     | '/programs/$slug'
     | '/admin/'
@@ -316,18 +346,21 @@ export interface FileRouteTypes {
     | '/partners'
     | '/resources'
     | '/admin/about'
+    | '/admin/campaigns'
     | '/admin/contact'
     | '/admin/donations'
     | '/admin/gallery'
     | '/admin/get-involved'
     | '/admin/home'
     | '/admin/login'
+    | '/admin/newsletter'
     | '/admin/partners'
     | '/admin/programs'
     | '/admin/resources'
     | '/admin/settings'
     | '/admin/stories'
     | '/donate/$slug'
+    | '/donate/thank-you'
     | '/news/$slug'
     | '/programs/$slug'
     | '/admin'
@@ -347,18 +380,21 @@ export interface FileRouteTypes {
     | '/programs'
     | '/resources'
     | '/admin/about'
+    | '/admin/campaigns'
     | '/admin/contact'
     | '/admin/donations'
     | '/admin/gallery'
     | '/admin/get-involved'
     | '/admin/home'
     | '/admin/login'
+    | '/admin/newsletter'
     | '/admin/partners'
     | '/admin/programs'
     | '/admin/resources'
     | '/admin/settings'
     | '/admin/stories'
     | '/donate/$slug'
+    | '/donate/thank-you'
     | '/news/$slug'
     | '/programs/$slug'
     | '/admin/'
@@ -494,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof NewsRoute
     }
+    '/donate/thank-you': {
+      id: '/donate/thank-you'
+      path: '/thank-you'
+      fullPath: '/donate/thank-you'
+      preLoaderRoute: typeof DonateThankYouRouteImport
+      parentRoute: typeof DonateRoute
+    }
     '/donate/$slug': {
       id: '/donate/$slug'
       path: '/$slug'
@@ -534,6 +577,13 @@ declare module '@tanstack/react-router' {
       path: '/partners'
       fullPath: '/admin/partners'
       preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/newsletter': {
+      id: '/admin/newsletter'
+      path: '/newsletter'
+      fullPath: '/admin/newsletter'
+      preLoaderRoute: typeof AdminNewsletterRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/login': {
@@ -578,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContactRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/campaigns': {
+      id: '/admin/campaigns'
+      path: '/campaigns'
+      fullPath: '/admin/campaigns'
+      preLoaderRoute: typeof AdminCampaignsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/about': {
       id: '/admin/about'
       path: '/about'
@@ -590,12 +647,14 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteRouteChildren {
   AdminAboutRoute: typeof AdminAboutRoute
+  AdminCampaignsRoute: typeof AdminCampaignsRoute
   AdminContactRoute: typeof AdminContactRoute
   AdminDonationsRoute: typeof AdminDonationsRoute
   AdminGalleryRoute: typeof AdminGalleryRoute
   AdminGetInvolvedRoute: typeof AdminGetInvolvedRoute
   AdminHomeRoute: typeof AdminHomeRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminProgramsRoute: typeof AdminProgramsRoute
   AdminResourcesRoute: typeof AdminResourcesRoute
@@ -606,12 +665,14 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAboutRoute: AdminAboutRoute,
+  AdminCampaignsRoute: AdminCampaignsRoute,
   AdminContactRoute: AdminContactRoute,
   AdminDonationsRoute: AdminDonationsRoute,
   AdminGalleryRoute: AdminGalleryRoute,
   AdminGetInvolvedRoute: AdminGetInvolvedRoute,
   AdminHomeRoute: AdminHomeRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminNewsletterRoute: AdminNewsletterRoute,
   AdminPartnersRoute: AdminPartnersRoute,
   AdminProgramsRoute: AdminProgramsRoute,
   AdminResourcesRoute: AdminResourcesRoute,
@@ -626,11 +687,13 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 
 interface DonateRouteChildren {
   DonateSlugRoute: typeof DonateSlugRoute
+  DonateThankYouRoute: typeof DonateThankYouRoute
   DonateIndexRoute: typeof DonateIndexRoute
 }
 
 const DonateRouteChildren: DonateRouteChildren = {
   DonateSlugRoute: DonateSlugRoute,
+  DonateThankYouRoute: DonateThankYouRoute,
   DonateIndexRoute: DonateIndexRoute,
 }
 

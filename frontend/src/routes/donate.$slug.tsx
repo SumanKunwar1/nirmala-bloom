@@ -1,43 +1,58 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { donationCampaigns } from "@/lib/constants";
+import { useContent } from "@/lib/admin/context";
+import { useAuth } from "@/lib/admin/context";
 import { campaignImages } from "@/lib/images";
 import { DonateButton } from "@/components/shared/DonateButton";
 import { ScrollReveal } from "@/components/shared/ScrollReveal";
 
 export const Route = createFileRoute("/donate/$slug")({
-  loader: ({ params }) => {
-    const campaign = donationCampaigns.find((c) => c.slug === params.slug);
-    if (!campaign) throw notFound();
-    return { campaign };
-  },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: loaderData ? `${loaderData.campaign.title} — Donate · Nirmala Foundation` : "Donate" },
-      { name: "description", content: loaderData?.campaign.desc ?? "" },
-      { property: "og:title", content: loaderData?.campaign.title ?? "Donate" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Donate — Nirmala Foundation Nepal" }] }),
   component: CampaignDetail,
-  notFoundComponent: () => (
-    <div className="min-h-screen grid place-items-center">
-      <div className="text-center">
-        <h1 className="text-3xl font-display">Campaign not found</h1>
-        <Link to="/donate" className="text-primary mt-4 inline-block">
-          All campaigns →
-        </Link>
-      </div>
-    </div>
-  ),
   errorComponent: ({ error }) => <div className="p-10">{error.message}</div>,
 });
 
 function CampaignDetail() {
-  const { campaign: c } = Route.useLoaderData();
-  const image = campaignImages[c.slug];
-  const pct = Math.min(100, Math.round((c.raised / c.goal) * 100));
+  const { slug } = useParams({ from: "/donate/$slug" });
+  const { campaigns } = useContent();
+  const { ready } = useAuth();
+
+  const c = campaigns.find((x) => x.slug === slug);
+
+  // SEO overrides are campaign content, so apply them client-side.
+  useEffect(() => {
+    if (!c) return;
+    document.title = c.seoTitle || `${c.title} — Donate · Nirmala Foundation`;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta && c.seoDescription) meta.setAttribute("content", c.seoDescription);
+  }, [c]);
+
+  // The store seeds instantly then refetches; only 404 once the load settled.
+  if (!c) {
+    if (!ready) {
+      return (
+        <div className="min-h-screen grid place-items-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary-pale border-t-primary" />
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-screen grid place-items-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-display">Campaign not found</h1>
+          <Link to="/donate" className="text-primary mt-4 inline-block">
+            All campaigns →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const image = c.image || campaignImages[c.slug];
+  const pct = c.percent;
   const fmt = (n: number) => `Rs. ${n.toLocaleString()}`;
-  const related = donationCampaigns.filter((x) => x.slug !== c.slug).slice(0, 3);
+  const related = campaigns.filter((x) => x.slug !== c.slug && x.published).slice(0, 3);
 
   return (
     <div
@@ -351,7 +366,7 @@ function CampaignDetail() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {related.map((r) => {
-              const rPct = Math.min(100, Math.round((r.raised / r.goal) * 100));
+              const rPct = r.percent;
               return (
                 <Link
                   key={r.slug}
@@ -361,7 +376,7 @@ function CampaignDetail() {
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
                     <img
-                      src={campaignImages[r.slug]}
+                      src={r.image || campaignImages[r.slug]}
                       alt={r.title}
                       loading="lazy"
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1100ms] group-hover:scale-[1.06]"

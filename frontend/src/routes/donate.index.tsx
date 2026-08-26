@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PageHero } from "@/components/shared/PageHero";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { DonationCampaignCard } from "@/components/shared/DonationCampaignCard";
 import { DonateButton } from "@/components/shared/DonateButton";
 import { ScrollReveal, containerVariants, itemVariants } from "@/components/shared/ScrollReveal";
-import { donationCampaigns } from "@/lib/constants";
+import { useContent } from "@/lib/admin/context";
+import { http } from "@/lib/api";
 import { campaignImages, imgs } from "@/lib/images";
 
 export const Route = createFileRoute("/donate/")({
@@ -49,8 +51,40 @@ const otherWays = [
   },
 ];
 
+type DonorWall = { donors: { name: string; date: string }[]; anonymousCount: number };
+
 function DonatePage() {
-  const featured = donationCampaigns.find((c) => c.urgent) ?? donationCampaigns[0];
+  const { campaigns } = useContent();
+
+  const live = campaigns.filter((c) => c.published);
+  const featured =
+    live.find((c) => c.featured && c.urgent) ?? live.find((c) => c.urgent) ?? live.find((c) => c.featured) ?? live[0];
+  const generalFund = live.find((c) => c.slug === "general-fund");
+
+  // Real supporters, newest first. Falls back to an empty wall if unreachable.
+  const [wall, setWall] = useState<DonorWall>({ donors: [], anonymousCount: 0 });
+  useEffect(() => {
+    let alive = true;
+    http
+      .get<DonorWall>("/donations/donors?limit=24", { auth: false })
+      .then((d) => alive && setWall(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Giving tiers are campaign content, so an admin can edit what each buys.
+  const tiers = (featured?.tiers ?? []).slice(0, 4);
+  const points = tiers.length
+    ? tiers.map((t, i) => ({
+        amount: `Rs. ${t.amount.toLocaleString()}`,
+        icon: impactPoints[i % impactPoints.length].icon,
+        text: t.impact,
+      }))
+    : impactPoints;
+
+  if (!featured) return null;
 
   return (
     <>
@@ -62,7 +96,7 @@ function DonatePage() {
         image={imgs.pageDonate}
         imageAlt="Funding inclusion in Nepal"
         stats={[
-          { value: "6", label: "Live campaigns" },
+          { value: String(live.length), label: "Live campaigns" },
           { value: "1,200+", label: "Lives touched" },
           { value: "100%", label: "Goes to programs" },
         ]}
@@ -75,7 +109,7 @@ function DonatePage() {
             <div className="grid lg:grid-cols-2">
               <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[460px] overflow-hidden">
                 <img
-                  src={campaignImages[featured.slug]}
+                  src={featured.image || campaignImages[featured.slug]}
                   alt={featured.title}
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover ken-burns"
@@ -117,7 +151,7 @@ function DonatePage() {
                   <div className="h-2.5 bg-primary-pale rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      whileInView={{ width: `${Math.round((featured.raised / featured.goal) * 100)}%` }}
+                      whileInView={{ width: `${featured.percent}%` }}
                       viewport={{ once: true }}
                       transition={{ duration: 1.4, ease: "easeOut" }}
                       className="h-full rounded-full"
@@ -129,10 +163,7 @@ function DonatePage() {
                       <strong className="text-ink">{featured.donors}</strong> donors
                     </span>
                     <span>
-                      <strong className="text-ink">
-                        {Math.round((featured.raised / featured.goal) * 100)}%
-                      </strong>{" "}
-                      funded
+                      <strong className="text-ink">{featured.percent}%</strong> funded
                     </span>
                   </div>
                 </div>
@@ -169,7 +200,7 @@ function DonatePage() {
           viewport={{ once: true, amount: 0.1 }}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {donationCampaigns.map((c) => (
+          {live.map((c) => (
             <motion.div key={c.id} variants={itemVariants}>
               <DonationCampaignCard campaign={c} />
             </motion.div>
@@ -188,8 +219,8 @@ function DonatePage() {
             align="center"
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
-            {impactPoints.map((p, i) => (
-              <ScrollReveal key={p.amount} delay={i * 0.08}>
+            {points.map((p, i) => (
+              <ScrollReveal key={`${p.amount}-${i}`} delay={i * 0.08}>
                 <div className="rounded-3xl bg-white border border-border p-6 soft-shadow hover:soft-shadow-lg transition-shadow h-full">
                   <div className="w-14 h-14 rounded-2xl grid place-items-center text-2xl bg-gradient-to-br from-primary-pale to-accent-light mb-4">
                     {p.icon}
@@ -234,7 +265,7 @@ function DonatePage() {
               </ul>
               <div className="mt-8">
                 <DonateButton
-                  campaign={donationCampaigns.find((c) => c.slug === "general-fund")}
+                  campaign={generalFund}
                   variant="primary"
                   className="px-8 py-4 text-base"
                 >
@@ -277,29 +308,24 @@ function DonatePage() {
         <div className="mx-auto max-w-5xl px-6">
           <SectionHeading eyebrow="Thank You" title="Our generous donors" align="center" />
           <div className="flex flex-wrap justify-center gap-3 mt-10">
-            {[
-              "Anonymous · 12 donors",
-              "Ram Shrestha",
-              "Sarah M.",
-              "Bikash Thapa",
-              "Kavita J.",
-              "Aditi P.",
-              "Suresh K.",
-              "Anjali D.",
-              "International Friend",
-              "Hari B.",
-              "Rina S.",
-              "Mark & Lila",
-              "Bodhi Trust",
-              "Utpala Family",
-            ].map((d, i) => (
+            {wall.anonymousCount > 0 && (
+              <span className="bg-white border border-border text-primary rounded-full px-5 py-2 text-sm font-medium">
+                Anonymous · {wall.anonymousCount} donor{wall.anonymousCount === 1 ? "" : "s"}
+              </span>
+            )}
+            {wall.donors.map((d) => (
               <span
-                key={i}
+                key={d.name}
                 className="bg-white border border-border text-primary rounded-full px-5 py-2 text-sm font-medium hover:soft-shadow transition-shadow"
               >
-                {d}
+                {d.name}
               </span>
             ))}
+            {wall.donors.length === 0 && wall.anonymousCount === 0 && (
+              <p className="text-text/60 text-sm">
+                Be the first name on this wall — every gift is acknowledged here unless you ask us not to.
+              </p>
+            )}
           </div>
           <p className="text-center text-text/60 text-sm mt-8">
             Want your name added — or kept anonymous?{" "}

@@ -10,6 +10,9 @@ export const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: json("Too many requests — please try again later."),
+  // Gateway traffic arrives in bursts from a small set of bank IPs and must
+  // never be throttled — those routes carry their own signature checks.
+  skip: (req) => req.path.startsWith("/payments/webhook/") || req.path.startsWith("/payments/callback/"),
 });
 
 /** Stricter limiter for auth endpoints (brute-force protection). */
@@ -28,4 +31,16 @@ export const submitLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: json("Too many submissions — please try again later."),
+});
+
+/**
+ * Opening a payment session writes a Donation + Payment record, so it is
+ * rate limited harder than a plain form post.
+ */
+export const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.PAYMENT_RATE_LIMIT_MAX || "20", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: json("Too many payment attempts — please wait a few minutes and try again."),
 });

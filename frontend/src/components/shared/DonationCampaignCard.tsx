@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import type { DonationCampaign } from "@/lib/constants";
+import type { Campaign } from "@/lib/admin/context";
 import { campaignImages } from "@/lib/images";
 import { DonateButton } from "@/components/shared/DonateButton";
 
-export function DonationCampaignCard({ campaign }: { campaign: DonationCampaign }) {
-  const pct = Math.min(100, Math.round((campaign.raised / campaign.goal) * 100));
+export function DonationCampaignCard({ campaign }: { campaign: Campaign }) {
+  // `percent` is computed server-side from the ledger; fall back for safety.
+  const pct = campaign.percent ?? Math.min(100, Math.round((campaign.raised / campaign.goal) * 100));
   const fmt = (n: number) => `Rs. ${n.toLocaleString()}`;
-  const image = campaignImages[campaign.slug];
+  // An admin-uploaded image wins; otherwise use the bundled stock shot.
+  const image = campaign.image || campaignImages[campaign.slug];
 
   return (
     <motion.article
@@ -84,13 +86,19 @@ export function DonationCampaignCard({ campaign }: { campaign: DonationCampaign 
             >
               Learn more
             </Link>
-            <DonateButton
-              campaign={campaign}
-              variant="primary"
-              className="text-sm py-2.5 shadow-md shadow-orange-200"
-            >
-              Donate now
-            </DonateButton>
+            {campaign.acceptsDonations === false ? (
+              <span className="grid place-items-center rounded-full bg-muted text-sm font-semibold text-text/50 py-2.5">
+                Closed
+              </span>
+            ) : (
+              <DonateButton
+                campaign={campaign}
+                variant="primary"
+                className="text-sm py-2.5 shadow-md shadow-orange-200"
+              >
+                Donate now
+              </DonateButton>
+            )}
           </div>
         </div>
       </div>

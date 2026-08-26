@@ -17,6 +17,8 @@ import {
   LogOut,
   Menu,
   X,
+  Target,
+  Mails,
 } from "lucide-react";
 import nirmalaLogo from "@/assets/nirmala-logo.png";
 import { useAuth } from "@/lib/admin/context";
@@ -38,8 +40,10 @@ const nav: NavItem[] = [
   { label: "Resources", to: "/admin/resources", icon: Library },
   { label: "Partners", to: "/admin/partners", icon: Building2 },
   { label: "Get Involved", to: "/admin/get-involved", icon: HeartHandshake },
+  { label: "Campaigns", to: "/admin/campaigns", icon: Target },
   { label: "Donations", to: "/admin/donations", icon: HandCoins },
   { label: "Contact", to: "/admin/contact", icon: Mail },
+  { label: "Newsletter", to: "/admin/newsletter", icon: Mails },
   { label: "Settings", to: "/admin/settings", icon: Settings },
 ];
 

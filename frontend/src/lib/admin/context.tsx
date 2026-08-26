@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { http, setToken, getToken } from "@/lib/api";
+import { http, setToken, getToken, type Stamped } from "@/lib/api";
 import {
   impactStats as seedImpact,
   testimonials as seedTestimonials,
@@ -19,6 +19,7 @@ import {
   resources as seedResources,
   galleryAlbums as seedAlbums,
   partners as seedPartners,
+  donationCampaigns as seedCampaigns,
   socialLinks,
 } from "@/lib/constants";
 import {
@@ -29,6 +30,7 @@ import {
   newsImages,
   galleryImages,
   partnerImages,
+  campaignImages,
 } from "@/lib/images";
 import nirmalaLogo from "@/assets/nirmala-logo.png";
 
@@ -57,7 +59,7 @@ const uid = () => {
 
 /* ----------------------------- Types ----------------------------- */
 
-export type HeroSlide = {
+export type HeroSlide = Stamped & {
   id: string;
   eyebrow: string;
   title: string;
@@ -65,14 +67,14 @@ export type HeroSlide = {
   image: string;
 };
 
-export type ImpactStat = {
+export type ImpactStat = Stamped & {
   id: string;
   label: string;
   value: number;
   suffix: string;
 };
 
-export type Testimonial = {
+export type Testimonial = Stamped & {
   id: string;
   quote: string;
   name: string;
@@ -81,7 +83,7 @@ export type Testimonial = {
 
 export type ProgramHighlight = { value: string; label: string };
 
-export type AdminProgram = {
+export type AdminProgram = Stamped & {
   id: string;
   title: string;
   slug: string;
@@ -102,11 +104,11 @@ export type AdminProgram = {
   seoKeywords: string;
 };
 
-export type TeamMember = { id: string; name: string; role: string; bio: string; photo: string };
+export type TeamMember = Stamped & { id: string; name: string; role: string; bio: string; photo: string };
 
-export type Milestone = { id: string; year: string; title: string; desc: string };
+export type Milestone = Stamped & { id: string; year: string; title: string; desc: string };
 
-export type Story = {
+export type Story = Stamped & {
   id: string;
   title: string;
   slug: string;
@@ -119,7 +121,7 @@ export type Story = {
   published: boolean;
 };
 
-export type InvolveWay = { id: string; icon: string; title: string; text: string; cta: string };
+export type InvolveWay = Stamped & { id: string; icon: string; title: string; text: string; cta: string };
 
 export type AboutContent = {
   heroTitle: string;
@@ -168,7 +170,7 @@ export type FooterContent = {
   legalLinks: FooterLink[];
 };
 
-export type Resource = {
+export type Resource = Stamped & {
   id: string;
   title: string;
   category: string;
@@ -177,7 +179,7 @@ export type Resource = {
   url: string;
 };
 
-export type GalleryAlbum = {
+export type GalleryAlbum = Stamped & {
   id: string;
   title: string;
   slug: string;
@@ -186,7 +188,7 @@ export type GalleryAlbum = {
   images: string[];
 };
 
-export type PartnerItem = {
+export type PartnerItem = Stamped & {
   id: string;
   name: string;
   tagline: string;
@@ -200,6 +202,73 @@ export type PartnerItem = {
   logo: string;
   featured: boolean;
 };
+
+export type CampaignTier = { amount: number; impact: string };
+export type CampaignStory = { name: string; role: string; quote: string };
+
+/**
+ * A fundraising campaign, as returned by the backend.
+ *
+ * `raised` / `donors` / `percent` are server-computed virtuals — they sum the
+ * admin-editable historic offsets with the live total of completed donations.
+ * Never write to them; edit `goal`, `raisedOffset` and `donorsOffset` instead.
+ */
+export type Campaign = Stamped & {
+  id: string;
+  title: string;
+  slug: string;
+  icon: string;
+  color: string;
+  image: string;
+  goal: number;
+  raisedOffset: number;
+  donorsOffset: number;
+  /** Derived, read-only. */
+  raisedOnline: number;
+  donorsOnline: number;
+  donationCount: number;
+  lastDonationAt: string | null;
+  raised: number;
+  donors: number;
+  percent: number;
+  remaining: number;
+  acceptsDonations: boolean;
+  urgent: boolean;
+  featured: boolean;
+  desc: string;
+  longDesc: string;
+  why: string;
+  tiers: CampaignTier[];
+  stories: CampaignStory[];
+  programSlug: string;
+  currency: string;
+  active: boolean;
+  published: boolean;
+  endsAt: string | null;
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords: string;
+  /** Display order on the donate page — set via the reorder endpoint. */
+  order: number;
+};
+
+/** Fields an admin may edit — the derived totals are excluded by construction. */
+export type CampaignInput = Omit<
+  Campaign,
+  | "id"
+  | "raisedOnline"
+  | "donorsOnline"
+  | "donationCount"
+  | "lastDonationAt"
+  | "raised"
+  | "donors"
+  | "percent"
+  | "remaining"
+  | "acceptsDonations"
+  | "order"
+  | "createdAt"
+  | "updatedAt"
+>;
 
 export type HomeContent = {
   heroSlides: HeroSlide[];
@@ -217,6 +286,7 @@ export type HomeContent = {
   resources: Resource[];
   galleryAlbums: GalleryAlbum[];
   partners: PartnerItem[];
+  campaigns: Campaign[];
 };
 
 /** Keys of HomeContent whose value is an orderable array of `{ id }` items. */
@@ -231,7 +301,8 @@ export type ArrayContentKey =
   | "getInvolved"
   | "resources"
   | "galleryAlbums"
-  | "partners";
+  | "partners"
+  | "campaigns";
 
 /* --------------------------- Seed data --------------------------- */
 
@@ -368,6 +439,42 @@ function defaultContent(): HomeContent {
       cover: galleryImages[a.slug] ?? "",
       images: [],
     })),
+    campaigns: seedCampaigns.map((c, i) => ({
+      id: uid(),
+      title: c.title,
+      slug: c.slug,
+      icon: c.icon,
+      color: c.color,
+      image: campaignImages[c.slug] ?? "",
+      goal: c.goal,
+      raisedOffset: c.raised,
+      donorsOffset: c.donors,
+      raisedOnline: 0,
+      donorsOnline: 0,
+      donationCount: 0,
+      lastDonationAt: null,
+      order: i,
+      raised: c.raised,
+      donors: c.donors,
+      percent: Math.min(100, Math.round((c.raised / c.goal) * 100)),
+      remaining: Math.max(0, c.goal - c.raised),
+      acceptsDonations: true,
+      urgent: !!c.urgent,
+      featured: i === 0,
+      desc: c.desc,
+      longDesc: c.longDesc,
+      why: c.why,
+      tiers: c.tiers.map((t) => ({ amount: t.amount, impact: t.impact })),
+      stories: c.stories.map((st) => ({ name: st.name, role: st.role, quote: st.quote })),
+      programSlug: "",
+      currency: "NPR",
+      active: true,
+      published: true,
+      endsAt: null,
+      seoTitle: `${c.title} — Donate · Nirmala Foundation Nepal`,
+      seoDescription: c.desc,
+      seoKeywords: `${c.title}, donate Nepal, disability inclusion`,
+    })),
     partners: seedPartners.map((p) => ({
       id: uid(),
       name: p.name,
@@ -410,6 +517,7 @@ const ENDPOINTS: Record<ArrayContentKey, string> = {
   resources: "resources",
   galleryAlbums: "gallery-albums",
   partners: "partners",
+  campaigns: "campaigns",
 };
 
 const AuthContext = createContext<AuthCtx | null>(null);
@@ -469,6 +577,12 @@ type ContentCtx = {
   addPartner: (p: Omit<PartnerItem, "id">) => void;
   updatePartner: (id: string, p: Omit<PartnerItem, "id">) => void;
   removePartner: (id: string) => void;
+  // Campaigns
+  addCampaign: (c: CampaignInput) => Promise<void>;
+  updateCampaign: (id: string, c: Partial<CampaignInput>) => Promise<void>;
+  removeCampaign: (id: string) => Promise<void>;
+  /** Re-pull campaign totals after donations settle. */
+  refreshCampaigns: () => Promise<void>;
   // Ordering (works on any array collection key)
   move: (collection: ArrayContentKey, id: string, dir: -1 | 1) => void;
   resetAll: () => void;
@@ -496,7 +610,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const fetchAll = useCallback(async () => {
     const q = "?limit=500&sort=order";
     const opt = { auth: false } as const;
-    const [settings, hero, impact, testi, progs, team, miles, stories, involve, resc, albums, prtnrs] =
+    const [settings, hero, impact, testi, progs, team, miles, stories, involve, resc, albums, prtnrs, camps] =
       await Promise.all([
         http.get<Record<string, any>>("/settings", opt).catch(() => null),
         http.get<any[]>(`/hero-slides${q}`, opt).catch(() => null),
@@ -510,6 +624,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         http.get<any[]>(`/resources${q}`, opt).catch(() => null),
         http.get<any[]>(`/gallery-albums${q}`, opt).catch(() => null),
         http.get<any[]>(`/partners${q}`, opt).catch(() => null),
+        // Sent WITH auth so a signed-in admin also receives unpublished drafts.
+        http.get<any[]>("/campaigns?all=true&limit=200&sort=order").catch(() => null),
       ]);
     setContent((c) => ({
       ...c,
@@ -524,6 +640,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       resources: resc ?? c.resources,
       galleryAlbums: albums ?? c.galleryAlbums,
       partners: prtnrs ?? c.partners,
+      campaigns: camps ?? c.campaigns,
       settings: settings?.site ? { ...c.settings, ...settings.site } : c.settings,
       about: settings?.about ? { ...c.about, ...settings.about } : c.about,
       contactInfo: settings?.contact ? { ...c.contactInfo, ...settings.contact } : c.contactInfo,
@@ -661,6 +778,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       addPartner: (p) => addTo("partners", p),
       updatePartner: (id, p) => updateIn("partners", id, p),
       removePartner: (id) => removeFrom("partners", id),
+      addCampaign: (c) => addTo("campaigns", c),
+      updateCampaign: (id, c) => updateIn("campaigns", id, c),
+      removeCampaign: (id) => removeFrom("campaigns", id),
+      refreshCampaigns: async () => {
+        try {
+          const list = await http.get<Campaign[]>("/campaigns?all=true&limit=200&sort=order");
+          setContent((c) => ({ ...c, campaigns: list }));
+        } catch (e) {
+          console.error("refresh campaigns", e);
+        }
+      },
       move: (collection, id, dir) => {
         const arr = [...(contentRef.current[collection] as any[])];
         const i = arr.findIndex((it) => it.id === id);

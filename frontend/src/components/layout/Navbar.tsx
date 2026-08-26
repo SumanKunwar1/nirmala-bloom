@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, ChevronDown, Plus } from "lucide-react";
 import { programs } from "@/lib/constants";
@@ -46,6 +46,11 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
+  /** Which desktop dropdown is showing. Controlled rather than CSS-hover so a
+   *  click can dismiss it — on hover alone the panel stays up after navigating
+   *  because the pointer is still over it. */
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement>(null);
   const { location } = useRouterState();
 
   const overHero = location.pathname === "/";
@@ -58,7 +63,49 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => { setOpen(false); }, [location.pathname]);
+  const closeMenus = useCallback(() => {
+    setOpen(false);
+    setOpenGroup(null);
+    setMobileGroup(null);
+  }, []);
+
+  /**
+   * Dismiss on navigation. Route changes also fire when only the search or
+   * hash differs, so this covers more than a plain pathname switch — and the
+   * link handlers below cover navigating to the page you are already on,
+   * where the router state never changes at all.
+   */
+  useEffect(() => {
+    closeMenus();
+  }, [location.pathname, location.searchStr, closeMenus]);
+
+  /** Escape closes the open dropdown; a click outside dismisses it too. */
+  useEffect(() => {
+    if (!openGroup) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenGroup(null);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpenGroup(null);
+    };
+
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [openGroup]);
+
+  /**
+   * Run on every nav link click. Closes the menus and drops focus, so the
+   * browser does not leave a focus ring on the item you just followed.
+   */
+  const handleNavigate = useCallback(() => {
+    closeMenus();
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  }, [closeMenus]);
 
   const linkColor = solid ? "text-ink/80" : "text-white/90";
 
@@ -70,7 +117,7 @@ export function Navbar() {
         }`}
       >
         <div className="mx-auto max-w-7xl px-6 h-[74px] flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3" aria-label="Nirmala Foundation home">
+          <Link to="/" onClick={handleNavigate} className="flex items-center gap-3" aria-label="Nirmala Foundation home">
             <img
               src={logo}
               alt=""
@@ -86,23 +133,71 @@ export function Navbar() {
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
-            {menu.map((group) =>
-              group.items ? (
-                <div key={group.label} className="relative group">
+          <nav ref={navRef} className="hidden lg:flex items-center gap-1">
+            {menu.map((group) => {
+              if (!group.items) {
+                return (
+                  <Link
+                    key={group.label}
+                    to={group.href!}
+                    onClick={handleNavigate}
+                    className={`px-3.5 py-2 text-[12px] font-display font-semibold uppercase tracking-[0.12em] transition-colors hover:text-accent ${linkColor}`}
+                    activeProps={{ className: "px-3.5 py-2 text-[12px] font-display font-semibold uppercase tracking-[0.12em] text-accent" }}
+                  >
+                    {group.label}
+                  </Link>
+                );
+              }
+
+              const isOpen = openGroup === group.label;
+              const panelId = `nav-${group.label.replace(/\s+/g, "-").toLowerCase()}`;
+
+              return (
+                <div
+                  key={group.label}
+                  className="relative"
+                  // Hover-to-open is for mice only. On a touch screen the
+                  // browser emulates enter/leave around a tap, which would
+                  // open the panel and then let the click toggle it shut.
+                  onPointerEnter={(e) => {
+                    if (e.pointerType === "mouse") setOpenGroup(group.label);
+                  }}
+                  onPointerLeave={(e) => {
+                    if (e.pointerType === "mouse") {
+                      setOpenGroup((g) => (g === group.label ? null : g));
+                    }
+                  }}
+                >
                   <button
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    onClick={() => setOpenGroup((g) => (g === group.label ? null : group.label))}
+                    onFocus={() => setOpenGroup(group.label)}
                     className={`flex items-center gap-1 px-3.5 py-2 text-[12px] font-display font-semibold uppercase tracking-[0.12em] transition-colors hover:text-accent ${linkColor}`}
                   >
                     {group.label}
-                    <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform group-hover:rotate-180" />
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 opacity-70 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 invisible translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible">
+                  <div
+                    id={panelId}
+                    className={`absolute left-1/2 -translate-x-1/2 top-full pt-3 transition-all duration-200 ${
+                      isOpen
+                        ? "opacity-100 visible translate-y-0"
+                        : "pointer-events-none invisible translate-y-2 opacity-0"
+                    }`}
+                  >
                     <div className="min-w-[230px] rounded-2xl bg-white border border-border shadow-[0_24px_60px_-20px_rgba(39,27,51,0.35)] p-2">
                       {group.items.map((item) => (
                         <Link
                           key={item.label + item.href}
                           to={item.href}
                           params={item.params as never}
+                          onClick={handleNavigate}
+                          tabIndex={isOpen ? undefined : -1}
                           className="block rounded-xl px-4 py-2.5 text-sm font-medium text-text hover:bg-primary-pale hover:text-primary transition-colors"
                         >
                           {item.label}
@@ -111,22 +206,14 @@ export function Navbar() {
                     </div>
                   </div>
                 </div>
-              ) : (
-                <Link
-                  key={group.label}
-                  to={group.href!}
-                  className={`px-3.5 py-2 text-[12px] font-display font-semibold uppercase tracking-[0.12em] transition-colors hover:text-accent ${linkColor}`}
-                  activeProps={{ className: "px-3.5 py-2 text-[12px] font-display font-semibold uppercase tracking-[0.12em] text-accent" }}
-                >
-                  {group.label}
-                </Link>
-              )
-            )}
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-3">
             <Link
               to="/donate"
+              onClick={handleNavigate}
               className="hidden md:inline-flex items-center gap-1.5 bg-accent text-white px-5 py-2.5 rounded-full text-[11px] font-display font-bold uppercase tracking-[0.12em] shadow-[0_10px_26px_-10px_rgba(217,115,43,0.85)] hover:-translate-y-0.5 transition-transform"
             >
               <Heart className="h-3.5 w-3.5" />
@@ -178,6 +265,7 @@ export function Navbar() {
                                 key={item.label + item.href}
                                 to={item.href}
                                 params={item.params as never}
+                                onClick={handleNavigate}
                                 className="py-2 pl-1 text-white/75 hover:text-accent"
                               >
                                 {item.label}
@@ -192,13 +280,14 @@ export function Navbar() {
                   <Link
                     key={group.label}
                     to={group.href!}
+                    onClick={handleNavigate}
                     className="block py-4 border-b border-white/10 text-white font-display font-bold uppercase tracking-[0.1em] text-lg hover:text-accent"
                   >
                     {group.label}
                   </Link>
                 )
               )}
-              <Link to="/donate" className="btn-pill btn-accent w-full justify-center mt-8">
+              <Link to="/donate" onClick={handleNavigate} className="btn-pill btn-accent w-full justify-center mt-8">
                 <Heart className="h-4 w-4" /> Donate Now
               </Link>
             </nav>

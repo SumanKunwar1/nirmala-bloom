@@ -1,6 +1,6 @@
 import { useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { DonationModal } from "@/components/shared/DonationModal";
-import type { DonationCampaign } from "@/lib/constants";
+import type { Campaign } from "@/lib/admin/context";
 
 type Variant = "primary" | "outline" | "white";
 
@@ -13,7 +13,7 @@ const variants: Record<Variant, string> = {
 };
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  campaign?: DonationCampaign;
+  campaign?: Campaign;
   variant?: Variant;
   children: ReactNode;
 };

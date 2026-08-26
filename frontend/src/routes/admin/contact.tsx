@@ -8,6 +8,7 @@ import { useHomeContent } from "@/lib/admin/context";
 import {
   useSubmissions,
   markSubmissionRead,
+  replyToSubmission,
   deleteSubmission,
   type ContactSubmission,
 } from "@/lib/admin/inbox";
@@ -39,10 +40,22 @@ function ContactAdminPage() {
   const [tab, setTab] = useState<Tab>("info");
   const [open, setOpen] = useState<ContactSubmission | null>(null);
   const [del, setDel] = useState<string | null>(null);
+  const [replying, setReplying] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replyMsg, setReplyMsg] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   const unread = submissions.filter((s) => !s.read).length;
 
+  /** Clear any half-written reply so it never leaks into the next message. */
+  const resetReply = () => {
+    setReplying(false);
+    setReplyText("");
+    setReplyMsg(null);
+  };
+
   const openSubmission = (s: ContactSubmission) => {
+    resetReply();
     setOpen(s);
     if (!s.read) markSubmissionRead(s.id, true);
   };
@@ -137,7 +150,10 @@ function ContactAdminPage() {
       {/* Submission detail */}
       <AdminModal
         open={open !== null}
-        onClose={() => setOpen(null)}
+        onClose={() => {
+          resetReply();
+          setOpen(null);
+        }}
         title={open?.subject ?? "Message"}
         description={open ? `From ${open.name} · ${fmtDate(open.createdAt)}` : ""}
         maxWidth="max-w-lg"
@@ -150,9 +166,13 @@ function ContactAdminPage() {
               <button type="button" onClick={() => { setDel(open.id); setOpen(null); }} className="inline-flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10">
                 <Trash2 style={{ width: 15, height: 15 }} /> Delete
               </button>
-              <a href={`mailto:${open.email}?subject=Re: ${encodeURIComponent(open.subject)}`} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:-translate-y-0.5 transition-transform">
-                <CornerUpLeft style={{ width: 15, height: 15 }} /> Reply
-              </a>
+              <button
+                type="button"
+                onClick={() => setReplying((r) => !r)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:-translate-y-0.5 transition-transform"
+              >
+                <CornerUpLeft style={{ width: 15, height: 15 }} /> {replying ? "Cancel reply" : "Reply"}
+              </button>
             </>
           ) : null
         }
@@ -169,6 +189,49 @@ function ContactAdminPage() {
               <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-text/50">Message</div>
               <p className="whitespace-pre-wrap rounded-xl border border-border bg-card p-4 text-sm leading-relaxed text-text/80">{open.message}</p>
             </div>
+
+            {/* Sends from the foundation's own address and marks the thread replied. */}
+            {replying && (
+              <div className="rounded-xl border border-primary/25 bg-primary-pale/25 p-4">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">
+                  Reply to {open.email}
+                </div>
+                <TextArea
+                  rows={5}
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder={`Hi ${open.name.split(" ")[0]},
+
+Thank you for getting in touch…`}
+                />
+                {replyMsg && <p className="mt-2 text-xs text-text/70">{replyMsg}</p>}
+                <button
+                  type="button"
+                  disabled={sending || replyText.trim().length < 2}
+                  onClick={async () => {
+                    setSending(true);
+                    setReplyMsg(null);
+                    try {
+                      const r = await replyToSubmission(open.id, replyText.trim());
+                      setReplyMsg(
+                        r.skipped
+                          ? "SMTP is off — the reply was logged and the message marked replied."
+                          : "Reply sent.",
+                      );
+                      setReplyText("");
+                      setOpen({ ...open, replied: true, read: true });
+                    } catch (e) {
+                      setReplyMsg(e instanceof Error ? e.message : "Could not send the reply.");
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
+                  className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  {sending ? "Sending…" : "Send reply"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </AdminModal>

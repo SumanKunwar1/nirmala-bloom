@@ -1,20 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { donationCampaigns, type DonationCampaign } from "@/lib/constants";
-import { submitDonation } from "@/lib/admin/inbox";
+import { useContent, type Campaign } from "@/lib/admin/context";
+import {
+  getPaymentMethods,
+  startDonation,
+  type CheckoutSession,
+  type PaymentGateway,
+} from "@/lib/admin/inbox";
 
-type Step = "form" | "method" | "card" | "esewa" | "khalti" | "bank" | "success";
-type Method = "card" | "esewa" | "khalti" | "bank";
+/* ------------------------------------------------------------------ *
+ * Donation modal
+ *
+ * Collects the gift, then hands the donor to the payment gateway.
+ *
+ * IMPORTANT: card details are never entered here. The bank's own hosted
+ * page takes them, which is what keeps this site out of PCI scope. We
+ * only ever hold a reference to the payment.
+ * ------------------------------------------------------------------ */
 
-const amounts = [500, 1000, 5000, 10000];
+type Step = "form" | "method" | "offline" | "redirecting";
 
-const methodTiles: { id: Method; name: string; sub: string; color: string; bg: string }[] = [
-  { id: "card", name: "Credit/Debit Card", sub: "Visa · Mastercard", color: "#1A56DB", bg: "#E0EAFE" },
-  { id: "esewa", name: "eSewa Mobile Wallet", sub: "Pay via eSewa", color: "#60BB46", bg: "#E6F5E1" },
-  { id: "khalti", name: "Khalti by IME", sub: "Mobile Wallet", color: "#5C2D91", bg: "#EEE5F7" },
-  { id: "bank", name: "Bank Transfer", sub: "Direct deposit", color: "#7C5C3A", bg: "#F3EBDD" },
-];
+const presetAmounts: Record<string, number[]> = {
+  NPR: [500, 1000, 5000, 10000],
+  USD: [10, 25, 50, 100],
+  EUR: [10, 25, 50, 100],
+  GBP: [10, 25, 50, 100],
+  AUD: [15, 35, 75, 150],
+  CAD: [15, 35, 75, 150],
+  INR: [500, 1000, 2500, 5000],
+  JPY: [1000, 3000, 5000, 10000],
+  SGD: [15, 35, 70, 140],
+  AED: [50, 100, 250, 500],
+};
+
+const MIN_AMOUNT: Record<string, number> = { NPR: 50, JPY: 100, INR: 50 };
+
+function money(amount: number, currency: string) {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: currency === "JPY" ? 0 : 0,
+      maximumFractionDigits: currency === "JPY" ? 0 : 2,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toLocaleString()}`;
+  }
+}
 
 function useMounted() {
   const [m, setM] = useState(false);
@@ -29,47 +62,60 @@ export function DonationModal({
 }: {
   open: boolean;
   onClose: () => void;
-  campaign?: DonationCampaign;
+  campaign?: Campaign;
 }) {
   const mounted = useMounted();
+  const { campaigns } = useContent();
+
+  const givable = useMemo(
+    () => campaigns.filter((c) => c.published && c.acceptsDonations !== false),
+    [campaigns],
+  );
 
   const [step, setStep] = useState<Step>("form");
-  const [campaignId, setCampaignId] = useState<number>(campaign?.id ?? donationCampaigns[0].id);
+  const [slug, setSlug] = useState(campaign?.slug ?? givable[0]?.slug ?? "general-fund");
+  const [currency, setCurrency] = useState("NPR");
   const [amount, setAmount] = useState<number | "">(1000);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
   const [message, setMessage] = useState("");
+  const [dedicateTo, setDedicateTo] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
   const [recurring, setRecurring] = useState(false);
-  const [method, setMethod] = useState<Method>("card");
 
-  // Card-step fields
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
-  const [saveCard, setSaveCard] = useState(true);
+  const [gateways, setGateways] = useState<PaymentGateway[]>([]);
+  const [currencies, setCurrencies] = useState<string[]>(["NPR"]);
+  const [gateway, setGateway] = useState("");
+  const [checkout, setCheckout] = useState<CheckoutSession | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const picked = campaign ?? donationCampaigns.find((c) => c.id === campaignId) ?? donationCampaigns[0];
+  const picked = campaign ?? givable.find((c) => c.slug === slug) ?? givable[0];
 
-  const recordDonation = async () => {
-    try {
-      await submitDonation({
-        donor: name.trim() || "Anonymous",
-        email: email.trim(),
-        amount: typeof amount === "number" ? amount : 0,
-        campaignSlug: picked.slug,
-        campaignTitle: picked.title,
-        method,
-        message: message.trim(),
+  /* Load the gateway list once the modal is first opened. */
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    getPaymentMethods()
+      .then((m) => {
+        if (!alive) return;
+        setGateways(m.gateways);
+        setCurrencies(m.supportedCurrencies);
+        setGateway((g) => g || m.defaultGateway);
+        setCurrency((c) => (m.supportedCurrencies.includes(c) ? c : m.baseCurrency));
+      })
+      .catch(() => {
+        if (alive) setError("Could not load payment methods. Please refresh and try again.");
       });
-    } catch {
-      /* demo flow — still show success even if the record fails */
-    }
-    setStep("success");
-  };
+    return () => {
+      alive = false;
+    };
+  }, [open]);
 
-  // Lock scroll + ESC + reset
+  /* Lock scroll + close on ESC. */
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -82,6 +128,7 @@ export function DonationModal({
     };
   }, [open, onClose]);
 
+  /* Reset once the close animation has finished. */
   useEffect(() => {
     if (open) return;
     const t = setTimeout(() => {
@@ -90,24 +137,78 @@ export function DonationModal({
       setName("");
       setEmail("");
       setPhone("");
+      setCountry("");
       setMessage("");
+      setDedicateTo("");
+      setAnonymous(false);
       setRecurring(false);
-      setMethod("card");
-      setCardNumber("");
-      setCardName("");
-      setCardExpiry("");
-      setCardCvv("");
+      setCheckout(null);
+      setError(null);
+      setSubmitting(false);
+      setCopied(false);
     }, 350);
     return () => clearTimeout(t);
   }, [open]);
 
-  const formValid =
-    typeof amount === "number" && amount >= 50 && name.trim().length > 0 && /.+@.+/.test(email);
-  const amountStr =
-    typeof amount === "number" ? `Rs. ${amount.toLocaleString()}` : "Rs. ____";
-  const totalLine = `${amountStr} to ${picked.title}${recurring ? " · monthly" : ""}`;
+  /* Keep the preset amount sensible when the currency changes. */
+  useEffect(() => {
+    const presets = presetAmounts[currency] ?? presetAmounts.NPR;
+    setAmount((a) => (typeof a === "number" && presets.includes(a) ? a : presets[1]));
+  }, [currency]);
 
-  if (!mounted) return null;
+  const min = MIN_AMOUNT[currency] ?? 1;
+  const formValid =
+    typeof amount === "number" &&
+    amount >= min &&
+    (anonymous || name.trim().length > 0) &&
+    /.+@.+\..+/.test(email);
+
+  const amountStr = typeof amount === "number" ? money(amount, currency) : "—";
+  const activeGateway = gateways.find((g) => g.key === gateway);
+
+  /** Create the donation, then either redirect or show transfer details. */
+  const submit = async () => {
+    if (!formValid || submitting) return;
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const result = await startDonation({
+        donor: anonymous ? "Anonymous" : name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        country: country.trim(),
+        amount: amount as number,
+        currency,
+        campaignSlug: picked?.slug,
+        gateway,
+        anonymous,
+        message: message.trim(),
+        dedicateTo: dedicateTo.trim(),
+        recurring,
+        frequency: recurring ? "monthly" : "one-time",
+      });
+
+      setCheckout(result.checkout);
+
+      if (result.checkout.kind === "offline" || !result.checkout.checkoutUrl) {
+        setStep("offline");
+        setSubmitting(false);
+        return;
+      }
+
+      // Hand the browser to the bank's hosted page.
+      setStep("redirecting");
+      window.location.assign(result.checkout.checkoutUrl);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setSubmitting(false);
+    }
+  };
+
+  if (!mounted || !picked) return null;
+
+  const totalLine = `${amountStr} to ${picked.title}${recurring ? " · monthly" : ""}`;
 
   return createPortal(
     <AnimatePresence>
@@ -118,7 +219,7 @@ export function DonationModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
           className="fixed inset-0 z-[100] bg-ink/70 backdrop-blur-sm grid place-items-center p-4 sm:p-6"
-          onClick={onClose}
+          onClick={step === "redirecting" ? undefined : onClose}
           aria-modal="true"
           role="dialog"
         >
@@ -133,21 +234,39 @@ export function DonationModal({
             <Header step={step} campaign={picked} onClose={onClose} totalLine={totalLine} />
 
             <div className="p-6 sm:p-8">
+              {error && (
+                <div className="mb-5 rounded-2xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+
               {step === "form" && (
                 <FormStep
                   campaignLocked={!!campaign}
-                  campaignId={campaignId}
-                  setCampaignId={setCampaignId}
+                  campaigns={givable}
+                  slug={picked.slug}
+                  setSlug={setSlug}
+                  currency={currency}
+                  setCurrency={setCurrency}
+                  currencies={currencies}
                   amount={amount}
                   setAmount={setAmount}
+                  min={min}
+                  tiers={picked.tiers}
                   name={name}
                   setName={setName}
                   email={email}
                   setEmail={setEmail}
                   phone={phone}
                   setPhone={setPhone}
+                  country={country}
+                  setCountry={setCountry}
                   message={message}
                   setMessage={setMessage}
+                  dedicateTo={dedicateTo}
+                  setDedicateTo={setDedicateTo}
+                  anonymous={anonymous}
+                  setAnonymous={setAnonymous}
                   recurring={recurring}
                   setRecurring={setRecurring}
                   picked={picked}
@@ -158,39 +277,29 @@ export function DonationModal({
 
               {step === "method" && (
                 <MethodStep
-                  onSelect={(m) => {
-                    setMethod(m);
-                    setStep(m);
-                  }}
-                  onBack={() => setStep("form")}
-                />
-              )}
-
-              {(step === "card" || step === "esewa" || step === "khalti" || step === "bank") && (
-                <PaymentStep
-                  method={method}
-                  setMethod={(m) => {
-                    setMethod(m);
-                    setStep(m);
-                  }}
+                  gateways={gateways}
+                  gateway={gateway}
+                  setGateway={setGateway}
+                  currency={currency}
                   amountStr={amountStr}
-                  picked={picked}
-                  cardNumber={cardNumber}
-                  setCardNumber={setCardNumber}
-                  cardName={cardName}
-                  setCardName={setCardName}
-                  cardExpiry={cardExpiry}
-                  setCardExpiry={setCardExpiry}
-                  cardCvv={cardCvv}
-                  setCardCvv={setCardCvv}
-                  saveCard={saveCard}
-                  setSaveCard={setSaveCard}
-                  onBack={() => setStep("method")}
-                  onPay={recordDonation}
+                  submitting={submitting}
+                  onBack={() => setStep("form")}
+                  onPay={submit}
                 />
               )}
 
-              {step === "success" && <SuccessStep picked={picked} amountStr={amountStr} onClose={onClose} />}
+              {step === "offline" && checkout?.instructions && (
+                <OfflineStep
+                  instructions={checkout.instructions}
+                  copied={copied}
+                  setCopied={setCopied}
+                  onClose={onClose}
+                />
+              )}
+
+              {step === "redirecting" && (
+                <RedirectingStep gatewayLabel={activeGateway?.label ?? "your bank"} url={checkout?.checkoutUrl} />
+              )}
             </div>
           </motion.div>
         </motion.div>
@@ -209,32 +318,31 @@ function Header({
   totalLine,
 }: {
   step: Step;
-  campaign: DonationCampaign;
+  campaign: Campaign;
   onClose: () => void;
   totalLine: string;
 }) {
   const stepLabel: Record<Step, string> = {
-    form: "1 of 3 · Your gift",
-    method: "2 of 3 · Payment method",
-    card: "3 of 3 · Card details",
-    esewa: "3 of 3 · eSewa",
-    khalti: "3 of 3 · Khalti",
-    bank: "3 of 3 · Bank transfer",
-    success: "Thank you",
+    form: "1 of 2 · Your gift",
+    method: "2 of 2 · Payment method",
+    offline: "Transfer details",
+    redirecting: "Taking you to your bank",
+  };
+  const heading: Record<Step, string> = {
+    form: "Complete your donation",
+    method: "Complete your donation",
+    offline: "Almost there — one transfer to go",
+    redirecting: "Redirecting…",
   };
 
   return (
-    <div
-      className="sticky top-0 z-10 px-6 sm:px-8 pt-6 pb-5 bg-white/95 backdrop-blur border-b border-border rounded-t-3xl"
-    >
+    <div className="sticky top-0 z-10 px-6 sm:px-8 pt-6 pb-5 bg-white/95 backdrop-blur border-b border-border rounded-t-3xl">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
             {stepLabel[step]}
           </div>
-          <h2 className="font-display text-xl sm:text-2xl font-semibold text-ink mt-1">
-            {step === "success" ? "Your gift was received." : "Complete your donation"}
-          </h2>
+          <h2 className="font-display text-xl sm:text-2xl font-semibold text-ink mt-1">{heading[step]}</h2>
           <div className="text-xs text-text/60 mt-1 truncate">
             <span className="inline-flex items-center gap-1.5">
               <span
@@ -247,28 +355,23 @@ function Header({
             </span>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="shrink-0 w-9 h-9 rounded-full bg-primary-pale grid place-items-center text-primary hover:bg-primary hover:text-white transition-colors"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
-        </button>
+        {step !== "redirecting" && (
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="shrink-0 w-9 h-9 rounded-full bg-primary-pale grid place-items-center text-primary hover:bg-primary hover:text-white transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
-      {/* Step progress bar */}
-      <div className="mt-4 grid grid-cols-3 gap-1.5">
-        {(["form", "method", "pay"] as const).map((s, i) => {
-          const active =
-            (s === "form" && step === "form") ||
-            (s === "method" && step === "method") ||
-            (s === "pay" && (step === "card" || step === "esewa" || step === "khalti" || step === "bank" || step === "success"));
-          const done =
-            (s === "form" && step !== "form") ||
-            (s === "method" && step !== "form" && step !== "method") ||
-            (s === "pay" && step === "success");
+      <div className="mt-4 grid grid-cols-2 gap-1.5">
+        {(["form", "pay"] as const).map((s, i) => {
+          const active = (s === "form" && step === "form") || (s === "pay" && step !== "form");
+          const done = (s === "form" && step !== "form") || (s === "pay" && (step === "offline" || step === "redirecting"));
           return (
             <div key={s} className="h-1 rounded-full overflow-hidden bg-border">
               <motion.div
@@ -285,48 +388,53 @@ function Header({
   );
 }
 
-/* ------------------------------ Step 1 — Form ------------------------------ */
+/* --------------------------- Step 1 — Gift --------------------------- */
 
 function FormStep(props: {
   campaignLocked: boolean;
-  campaignId: number;
-  setCampaignId: (n: number) => void;
+  campaigns: Campaign[];
+  slug: string;
+  setSlug: (s: string) => void;
+  currency: string;
+  setCurrency: (s: string) => void;
+  currencies: string[];
   amount: number | "";
   setAmount: (n: number | "") => void;
+  min: number;
+  tiers: Campaign["tiers"];
   name: string;
   setName: (s: string) => void;
   email: string;
   setEmail: (s: string) => void;
   phone: string;
   setPhone: (s: string) => void;
+  country: string;
+  setCountry: (s: string) => void;
   message: string;
   setMessage: (s: string) => void;
+  dedicateTo: string;
+  setDedicateTo: (s: string) => void;
+  anonymous: boolean;
+  setAnonymous: (b: boolean) => void;
   recurring: boolean;
   setRecurring: (b: boolean) => void;
-  picked: DonationCampaign;
+  picked: Campaign;
   formValid: boolean;
   onContinue: () => void;
 }) {
   const {
-    campaignLocked,
-    campaignId,
-    setCampaignId,
-    amount,
-    setAmount,
-    name,
-    setName,
-    email,
-    setEmail,
-    phone,
-    setPhone,
-    message,
-    setMessage,
-    recurring,
-    setRecurring,
-    picked,
-    formValid,
-    onContinue,
+    campaignLocked, campaigns, slug, setSlug, currency, setCurrency, currencies,
+    amount, setAmount, min, tiers, name, setName, email, setEmail, phone, setPhone,
+    country, setCountry, message, setMessage, dedicateTo, setDedicateTo,
+    anonymous, setAnonymous, recurring, setRecurring, picked, formValid, onContinue,
   } = props;
+
+  const presets = presetAmounts[currency] ?? presetAmounts.NPR;
+  // Show what this gift buys, if the campaign publishes matching tiers.
+  const matchedTier =
+    typeof amount === "number" && currency === "NPR"
+      ? [...tiers].sort((a, b) => b.amount - a.amount).find((t) => amount >= t.amount)
+      : undefined;
 
   return (
     <form
@@ -339,12 +447,12 @@ function FormStep(props: {
       {!campaignLocked && (
         <Field label="Choose a campaign">
           <select
-            value={campaignId}
-            onChange={(e) => setCampaignId(Number(e.target.value))}
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
             className="w-full rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary bg-white"
           >
-            {donationCampaigns.map((c) => (
-              <option key={c.id} value={c.id}>
+            {campaigns.map((c) => (
+              <option key={c.id} value={c.slug}>
                 {c.icon} {c.title}
               </option>
             ))}
@@ -352,9 +460,34 @@ function FormStep(props: {
         </Field>
       )}
 
-      <Field label="Amount (NPR)">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-          {amounts.map((a) => (
+      <Field label="Amount">
+        <div className="mb-3 flex gap-2">
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            aria-label="Currency"
+            className="rounded-2xl border border-border px-3 py-3 outline-none focus:border-primary bg-white font-mono-stat text-sm font-semibold"
+          >
+            {currencies.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <div className="relative flex-1">
+            <input
+              type="number"
+              min={min}
+              step="any"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder="Custom amount"
+              className="w-full rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {presets.map((a) => (
             <button
               key={a}
               type="button"
@@ -365,26 +498,30 @@ function FormStep(props: {
                   : "border-border text-text hover:border-primary/40"
               }`}
             >
-              Rs. {a.toLocaleString()}
+              {money(a, currency)}
             </button>
           ))}
         </div>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text/50 font-mono-stat text-sm">Rs.</span>
-          <input
-            type="number"
-            min={50}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value === "" ? "" : Number(e.target.value))}
-            placeholder="Custom amount"
-            className="w-full rounded-2xl border border-border pl-12 pr-4 py-3 outline-none focus:border-primary"
-          />
-        </div>
+        {matchedTier && (
+          <p className="mt-2.5 text-xs text-green flex items-center gap-1.5">
+            <span aria-hidden>✓</span> That funds: <strong>{matchedTier.impact}</strong>
+          </p>
+        )}
+        {currency !== "NPR" && (
+          <p className="mt-2 text-[11px] text-text/55">
+            Charged in {currency}. We convert to Nepali Rupees at the bank's rate on the day.
+          </p>
+        )}
       </Field>
 
       <div className="grid sm:grid-cols-2 gap-3">
-        <Field label="Full name *">
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Asha Bhandari" />
+        <Field label={anonymous ? "Full name (hidden publicly)" : "Full name *"}>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Asha Bhandari"
+            disabled={anonymous}
+          />
         </Field>
         <Field label="Email *">
           <Input
@@ -395,8 +532,20 @@ function FormStep(props: {
           />
         </Field>
       </div>
-      <Field label="Phone (optional)">
-        <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+977 9800000000" />
+      <div className="grid sm:grid-cols-2 gap-3">
+        <Field label="Phone (optional)">
+          <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+977 9800000000" />
+        </Field>
+        <Field label="Country (optional)">
+          <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Nepal" />
+        </Field>
+      </div>
+      <Field label="Dedicate this gift (optional)">
+        <Input
+          value={dedicateTo}
+          onChange={(e) => setDedicateTo(e.target.value)}
+          placeholder="In memory of… / In honour of…"
+        />
       </Field>
       <Field label="A message to the team (optional)">
         <textarea
@@ -408,24 +557,26 @@ function FormStep(props: {
         />
       </Field>
 
-      <label className="flex items-center gap-3 cursor-pointer select-none">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={recurring}
-          onClick={() => setRecurring(!recurring)}
-          className={`relative w-11 h-6 rounded-full transition-colors ${recurring ? "bg-primary" : "bg-border"}`}
-        >
-          <motion.span
-            animate={{ x: recurring ? 22 : 2 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow"
-          />
-        </button>
-        <span className="text-sm text-text/80">
-          Make this a <strong className="text-ink">monthly</strong> gift — predictable funding helps us plan
-        </span>
-      </label>
+      <div className="space-y-3">
+        <Toggle
+          checked={recurring}
+          onChange={setRecurring}
+          label={
+            <>
+              Make this a <strong className="text-ink">monthly</strong> gift — predictable funding helps us plan
+            </>
+          }
+        />
+        <Toggle
+          checked={anonymous}
+          onChange={setAnonymous}
+          label={
+            <>
+              Give <strong className="text-ink">anonymously</strong> — your name stays off the public supporter wall
+            </>
+          }
+        />
+      </div>
 
       <button
         type="submit"
@@ -436,47 +587,100 @@ function FormStep(props: {
             : "bg-border text-text/40 cursor-not-allowed shadow-none"
         }`}
       >
-        Make my gift to {picked.title} →
+        Continue to payment →
       </button>
       <p className="text-[11px] text-center text-text/55">
-        Step 2: choose how you'd like to pay. You can still go back and edit.
+        Giving to <strong className="text-ink">{picked.title}</strong>. You can still go back and edit.
       </p>
     </form>
   );
 }
 
-/* ------------------------------ Step 2 — Method ------------------------------ */
+/* -------------------------- Step 2 — Method -------------------------- */
 
-function MethodStep({ onSelect, onBack }: { onSelect: (m: Method) => void; onBack: () => void }) {
+function MethodStep({
+  gateways,
+  gateway,
+  setGateway,
+  currency,
+  amountStr,
+  submitting,
+  onBack,
+  onPay,
+}: {
+  gateways: PaymentGateway[];
+  gateway: string;
+  setGateway: (k: string) => void;
+  currency: string;
+  amountStr: string;
+  submitting: boolean;
+  onBack: () => void;
+  onPay: () => void;
+}) {
+  const usable = gateways.filter((g) => g.currencies.includes(currency));
+  const chosen = usable.find((g) => g.key === gateway);
+
+  // Fall back to the first usable gateway if the current pick can't take this currency.
+  useEffect(() => {
+    if (usable.length && !usable.some((g) => g.key === gateway)) setGateway(usable[0].key);
+  }, [currency, usable, gateway, setGateway]);
+
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="font-display text-lg font-semibold text-ink">Select Payment Method</h3>
+        <h3 className="font-display text-lg font-semibold text-ink">How would you like to pay?</h3>
         <p className="text-sm text-text/65 mt-1">
-          Choose how you&apos;d like to send your gift — all routes are encrypted and instant.
+          You&apos;ll finish on your bank&apos;s own secure page — we never see or store your card details.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {methodTiles.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => onSelect(t.id)}
-            className="group rounded-2xl border border-border bg-white p-4 text-center hover:border-primary/40 hover:soft-shadow transition-all"
-          >
-            <div
-              className="w-14 h-14 mx-auto rounded-2xl grid place-items-center mb-3 transition-transform group-hover:scale-105"
-              style={{ background: t.bg, color: t.color }}
-            >
-              <MethodIcon id={t.id} />
-            </div>
-            <div className="font-semibold text-ink text-sm leading-tight">{t.name}</div>
-            <div className="text-[11px] text-text/55 mt-1">{t.sub}</div>
-          </button>
-        ))}
-      </div>
+      {usable.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-muted/40 p-5 text-sm text-text/70">
+          No payment method currently accepts {currency}. Please go back and choose another currency.
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {usable.map((g) => {
+            const active = g.key === gateway;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => setGateway(g.key)}
+                className={`w-full flex items-start gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+                  active ? "border-primary bg-primary-pale/30" : "border-border hover:border-primary/40"
+                }`}
+              >
+                <span
+                  className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition-colors ${
+                    active ? "border-primary bg-primary" : "border-border"
+                  }`}
+                >
+                  {active && <span className="h-2 w-2 rounded-full bg-white" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-ink">{g.label}</span>
+                    {g.kind === "redirect" && (
+                      <span className="rounded-full bg-green-light px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-green">
+                        Instant
+                      </span>
+                    )}
+                    {g.mode === "mock" && (
+                      <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
+                        Test mode
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-1 block text-sm text-text/65">{g.description}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      <div className="flex items-center gap-2 text-[11px] text-text/55 pt-2">
+      <div className="flex flex-wrap items-center gap-2 text-[11px] text-text/55">
         <span>🔒 SSL secured</span>
         <span>·</span>
         <span>📧 Receipt by email</span>
@@ -484,269 +688,114 @@ function MethodStep({ onSelect, onBack }: { onSelect: (m: Method) => void; onBac
         <span>🇳🇵 NGO-registered</span>
       </div>
 
-      <div className="pt-2 border-t border-border flex justify-between">
-        <button onClick={onBack} className="text-sm text-text/70 hover:text-primary transition-colors">
-          ← Back
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------ Step 3 — Payment ------------------------------ */
-
-function PaymentStep(props: {
-  method: Method;
-  setMethod: (m: Method) => void;
-  amountStr: string;
-  picked: DonationCampaign;
-  cardNumber: string;
-  setCardNumber: (s: string) => void;
-  cardName: string;
-  setCardName: (s: string) => void;
-  cardExpiry: string;
-  setCardExpiry: (s: string) => void;
-  cardCvv: string;
-  setCardCvv: (s: string) => void;
-  saveCard: boolean;
-  setSaveCard: (b: boolean) => void;
-  onBack: () => void;
-  onPay: () => void;
-}) {
-  const { method, setMethod, amountStr, onBack, onPay } = props;
-  return (
-    <div className="space-y-5">
-      {/* Method tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-primary-pale/40 rounded-2xl">
-        {methodTiles.map((t) => {
-          const active = method === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setMethod(t.id)}
-              className={`rounded-xl px-3 py-3 text-center transition-all ${
-                active ? "bg-white shadow-md" : "hover:bg-white/60"
-              }`}
-            >
-              <div
-                className="w-8 h-8 mx-auto rounded-lg grid place-items-center mb-1.5"
-                style={{ background: active ? t.bg : "#fff", color: t.color }}
-              >
-                <MethodIcon id={t.id} small />
-              </div>
-              <div className={`text-[11px] font-semibold leading-tight ${active ? "text-ink" : "text-text/65"}`}>
-                {t.name}
-              </div>
-              <div className={`text-[10px] mt-0.5 ${active ? "text-text/60" : "text-text/45"}`}>
-                {t.sub}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Body */}
-      <div className="rounded-2xl border border-border bg-white p-5 sm:p-6">
-        {method === "card" && <CardForm {...props} />}
-        {method === "esewa" && <RedirectInstructions provider="eSewa" />}
-        {method === "khalti" && <RedirectInstructions provider="Khalti" />}
-        {method === "bank" && <BankDetails />}
-      </div>
-
       <button
         onClick={onPay}
-        className="w-full bg-accent text-white rounded-full py-4 text-base font-semibold hover:-translate-y-0.5 transition-transform shadow-[0_18px_40px_-12px_rgba(249,115,22,0.55)]"
+        disabled={submitting || usable.length === 0}
+        className={`w-full rounded-full py-4 text-base font-semibold transition-all ${
+          submitting || usable.length === 0
+            ? "bg-border text-text/40 cursor-not-allowed"
+            : "bg-accent text-white hover:-translate-y-0.5 shadow-[0_18px_40px_-12px_rgba(249,115,22,0.55)]"
+        }`}
       >
-        Pay {amountStr} now →
+        {submitting
+          ? "Opening secure payment…"
+          : chosen?.kind === "offline"
+            ? `Get transfer details for ${amountStr}`
+            : `Pay ${amountStr} securely →`}
       </button>
 
       <div className="pt-2 border-t border-border flex justify-between">
         <button onClick={onBack} className="text-sm text-text/70 hover:text-primary transition-colors">
-          ← Change method
+          ← Back
         </button>
-        <div className="text-[11px] text-text/55 self-center">🔒 Encrypted end-to-end</div>
+        <div className="text-[11px] text-text/55 self-center">Encrypted end-to-end</div>
       </div>
     </div>
   );
 }
 
-function CardForm(props: {
-  cardNumber: string;
-  setCardNumber: (s: string) => void;
-  cardName: string;
-  setCardName: (s: string) => void;
-  cardExpiry: string;
-  setCardExpiry: (s: string) => void;
-  cardCvv: string;
-  setCardCvv: (s: string) => void;
-  saveCard: boolean;
-  setSaveCard: (b: boolean) => void;
+/* ------------------------ Offline bank transfer ------------------------ */
+
+function OfflineStep({
+  instructions,
+  copied,
+  setCopied,
+  onClose,
+}: {
+  instructions: NonNullable<CheckoutSession["instructions"]>;
+  copied: boolean;
+  setCopied: (b: boolean) => void;
+  onClose: () => void;
 }) {
-  const { cardNumber, setCardNumber, cardName, setCardName, cardExpiry, setCardExpiry, cardCvv, setCardCvv, saveCard, setSaveCard } = props;
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-semibold text-ink">New Credit/Debit Card</div>
-        <div className="flex items-center gap-2 text-xs text-text/55">
-          <Brand label="VISA" color="#1A1F71" />
-          <Brand label="MC" color="#EB001B" />
-          <Brand label="AmEx" color="#2671B8" />
-        </div>
-      </div>
-
-      <Field label="Card number *">
-        <Input
-          inputMode="numeric"
-          maxLength={19}
-          value={cardNumber}
-          onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-          placeholder="1234 5678 9012 3456"
-        />
-      </Field>
-
-      <Field label="Name on card *">
-        <Input
-          value={cardName}
-          onChange={(e) => setCardName(e.target.value.toUpperCase())}
-          placeholder="ASHA BHANDARI"
-        />
-      </Field>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Expiry date *">
-          <Input
-            inputMode="numeric"
-            maxLength={5}
-            value={cardExpiry}
-            onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
-            placeholder="MM/YY"
-          />
-        </Field>
-        <Field label="CVV *">
-          <Input
-            inputMode="numeric"
-            maxLength={4}
-            value={cardCvv}
-            onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ""))}
-            placeholder="123"
-          />
-        </Field>
-      </div>
-
-      <label className="flex items-start gap-3 cursor-pointer select-none pt-1">
-        <input
-          type="checkbox"
-          checked={saveCard}
-          onChange={(e) => setSaveCard(e.target.checked)}
-          className="mt-0.5 w-4 h-4 accent-accent"
-        />
-        <span className="text-xs text-text/70 leading-relaxed">
-          <strong className="text-ink">Save card</strong> — we&apos;ll store this securely for one-tap giving next
-          time. You can remove it any time from your account.
-        </span>
-      </label>
-    </div>
-  );
-}
-
-function RedirectInstructions({ provider }: { provider: "eSewa" | "Khalti" }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-text/75 leading-relaxed">
-        You will be redirected to your <strong className="text-ink">{provider}</strong> account to complete your
-        payment:
-      </p>
-      <ol className="space-y-3 text-sm text-text/80">
-        {[
-          `Login to your ${provider} account using your ${provider} ID and password.`,
-          `Ensure your ${provider} account is active and has sufficient balance.`,
-          "Enter the OTP (one-time password) sent to your registered mobile number.",
-        ].map((line, i) => (
-          <li key={i} className="flex gap-3">
-            <span
-              className="w-6 h-6 shrink-0 rounded-full grid place-items-center text-xs font-mono-stat font-bold bg-primary-pale text-primary"
-            >
-              {i + 1}
-            </span>
-            <span>{line}</span>
-          </li>
-        ))}
-      </ol>
-      <p className="text-xs text-text/60 italic">
-        ***Login with your {provider} mobile and PASSWORD (not MPIN)***
-      </p>
-    </div>
-  );
-}
-
-function BankDetails() {
   const rows: [string, string][] = [
-    ["Account Name", "Nirmala Foundation Nepal"],
-    ["Bank", "Nepal Investment Mega Bank Ltd."],
-    ["Account #", "0123-4567-8910-11"],
-    ["Branch", "Kathmandu"],
-    ["SWIFT (international)", "NIBLNPKT"],
-    ["Reference", "Use your email as reference"],
+    ["Account name", instructions.accountName],
+    ["Bank", instructions.bankName],
+    ["Account number", instructions.accountNumber],
+    ["Branch", instructions.branch],
+    ["SWIFT (international)", instructions.swift],
+    ["Amount", money(instructions.amount, instructions.currency)],
+    ["Your reference", instructions.reference],
   ];
+
+  const copyAll = async () => {
+    await navigator.clipboard.writeText(rows.map(([k, v]) => `${k}: ${v}`).join("\n"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
+
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-text/75 leading-relaxed">
-        Use these details to transfer from any Nepali or international bank. Send a screenshot to{" "}
-        <span className="text-primary font-medium">accounts@nirmalafoundation.org.np</span> once paid and
-        we&apos;ll match it to your donation.
-      </p>
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-accent/25 bg-accent-light/40 p-4 text-sm text-text/80">
+        Your donation is recorded as <strong className="text-ink">pending</strong>. Quote the reference below
+        when you transfer — we&apos;ll match it and email your receipt as soon as it lands.
+      </div>
+
       <dl className="rounded-2xl bg-primary-pale/40 p-5 space-y-2.5 text-sm">
         {rows.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-4">
             <dt className="text-text/65">{k}</dt>
-            <dd className="font-medium text-ink text-right">{v}</dd>
+            <dd className={`text-right font-medium text-ink ${k === "Your reference" ? "font-mono-stat" : ""}`}>
+              {v}
+            </dd>
           </div>
         ))}
       </dl>
+
+      <p className="text-sm text-text/70 leading-relaxed">{instructions.instructions}</p>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          onClick={copyAll}
+          className="flex-1 rounded-full border-2 border-primary/20 text-primary py-3 font-semibold hover:bg-primary-pale transition-colors"
+        >
+          {copied ? "Copied ✓" : "Copy transfer details"}
+        </button>
+        <button
+          onClick={onClose}
+          className="flex-1 rounded-full bg-primary text-white py-3 font-semibold hover:-translate-y-0.5 transition-transform"
+        >
+          Done
+        </button>
+      </div>
     </div>
   );
 }
 
-/* ------------------------------ Step 4 — Success ------------------------------ */
+/* ---------------------------- Redirecting ---------------------------- */
 
-function SuccessStep({
-  picked,
-  amountStr,
-  onClose,
-}: {
-  picked: DonationCampaign;
-  amountStr: string;
-  onClose: () => void;
-}) {
+function RedirectingStep({ gatewayLabel, url }: { gatewayLabel: string; url?: string }) {
   return (
-    <div className="text-center py-4">
-      <motion.div
-        initial={{ scale: 0, rotate: -30 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 240, damping: 18 }}
-        className="w-20 h-20 mx-auto rounded-full bg-green-light grid place-items-center"
-      >
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2D7A4F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12l5 5L20 7" />
-        </svg>
-      </motion.div>
-      <h3 className="font-display text-2xl font-semibold mt-5">Thank you, truly. 💜</h3>
-      <p className="text-text/75 mt-2 max-w-md mx-auto">
-        Your gift of <strong className="text-ink">{amountStr}</strong> to{" "}
-        <strong className="text-ink">{picked.title}</strong> has been received. A receipt is on its way to your
-        email.
+    <div className="py-8 text-center">
+      <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary-pale border-t-primary" />
+      <h3 className="font-display text-xl font-semibold mt-6">Taking you to {gatewayLabel}…</h3>
+      <p className="text-text/70 mt-2 text-sm max-w-sm mx-auto">
+        Complete your payment on their secure page. We&apos;ll bring you straight back with your receipt.
       </p>
-      <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
-        <button
-          onClick={onClose}
-          className="bg-primary text-white rounded-full px-7 py-3 font-semibold hover:-translate-y-0.5 transition-transform"
-        >
-          Close
-        </button>
-        <button className="border-2 border-primary/20 text-primary rounded-full px-7 py-3 font-semibold hover:bg-primary-pale transition-colors">
-          Share this campaign
-        </button>
-      </div>
+      {url && (
+        <a href={url} className="mt-5 inline-block text-sm font-semibold text-primary underline">
+          Not redirected? Continue manually →
+        </a>
+      )}
     </div>
   );
 }
@@ -766,53 +815,36 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary transition-colors ${props.className ?? ""}`}
+      className={`w-full rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary transition-colors disabled:bg-muted/50 disabled:text-text/40 ${props.className ?? ""}`}
     />
   );
 }
 
-function Brand({ label, color }: { label: string; color: string }) {
+function Toggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (b: boolean) => void;
+  label: React.ReactNode;
+}) {
   return (
-    <span
-      className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded text-white"
-      style={{ background: color }}
-    >
-      {label}
-    </span>
+    <label className="flex items-center gap-3 cursor-pointer select-none">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative w-11 h-6 shrink-0 rounded-full transition-colors ${checked ? "bg-primary" : "bg-border"}`}
+      >
+        <motion.span
+          animate={{ x: checked ? 22 : 2 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow"
+        />
+      </button>
+      <span className="text-sm text-text/80">{label}</span>
+    </label>
   );
-}
-
-function MethodIcon({ id, small = false }: { id: Method; small?: boolean }) {
-  const size = small ? 16 : 24;
-  switch (id) {
-    case "card":
-      return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="5" width="20" height="14" rx="2" />
-          <path d="M2 10h20" />
-        </svg>
-      );
-    case "esewa":
-      return <span className="font-bold" style={{ fontSize: size * 0.85, lineHeight: 1 }}>e</span>;
-    case "khalti":
-      return <span className="font-bold" style={{ fontSize: size * 0.7, lineHeight: 1, letterSpacing: -0.5 }}>khalti</span>;
-    case "bank":
-      return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 10l9-7 9 7" />
-          <path d="M5 10v10h14V10" />
-          <path d="M9 20v-6h6v6" />
-        </svg>
-      );
-  }
-}
-
-function formatCardNumber(v: string) {
-  const digits = v.replace(/\D/g, "").slice(0, 16);
-  return digits.replace(/(.{4})/g, "$1 ").trim();
-}
-function formatExpiry(v: string) {
-  const digits = v.replace(/\D/g, "").slice(0, 4);
-  if (digits.length < 3) return digits;
-  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }

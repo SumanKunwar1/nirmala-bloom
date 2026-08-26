@@ -18,7 +18,7 @@ const schema = new mongoose.Schema(
     read: { type: Boolean, default: false },
     replied: { type: Boolean, default: false },
     replyMessage: { type: String, default: "" },
-    repliedAt: { type: Date },
+    repliedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

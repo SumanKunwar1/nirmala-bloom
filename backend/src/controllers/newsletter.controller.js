@@ -52,5 +52,5 @@ export const stats = asyncHandler(async (req, res) => {
     Subscriber.countDocuments(),
     Subscriber.countDocuments({ active: true }),
   ]);
-  return success(res, { total, active });
+  return success(res, { total, active, unsubscribed: total - active });
 });
