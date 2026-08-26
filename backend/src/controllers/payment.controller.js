@@ -32,8 +32,12 @@ export const methods = asyncHandler(async (req, res) =>
  * Create a Payment for a Donation and ask the gateway for a checkout session.
  * Shared by the public donate flow and the "retry payment" endpoint.
  */
-export async function startPayment({ donation, gatewayKey, req }) {
+export async function startPayment({ donation, gatewayKey, instrument, req }) {
   const gateway = getGateway(gatewayKey);
+
+  if (gateway.supportsInstrument && !gateway.supportsInstrument(instrument)) {
+    throw ApiError.badRequest(`${gateway.label} does not offer "${instrument}" payments`);
+  }
 
   if (!gateway.supports(donation.currency)) {
     throw ApiError.badRequest(
@@ -54,6 +58,7 @@ export async function startPayment({ donation, gatewayKey, req }) {
     baseCurrency: donation.baseCurrency,
     fxRate: donation.fxRate,
     status: "initiated",
+    requestedInstrument: instrument || "",
     expiresAt,
     ip: req?.ip || "",
     userAgent: req?.headers?.["user-agent"] || "",
@@ -66,6 +71,7 @@ export async function startPayment({ donation, gatewayKey, req }) {
     result = await gateway.initiate({
       payment,
       donation,
+      instrument,
       returnUrl: `${base}/callback/${gateway.key}`,
       cancelUrl: `${base}/callback/${gateway.key}?status=CANCELLED&merchantTxnId=${reference}`,
       webhookUrl: `${base}/webhook/${gateway.key}`,
@@ -89,7 +95,7 @@ export async function startPayment({ donation, gatewayKey, req }) {
   donation.payment = payment._id;
   donation.reference = reference;
   donation.gateway = gateway.key;
-  donation.method = gateway.kind === "offline" ? "Bank transfer" : gateway.label;
+  donation.method = describeMethod(gateway, instrument);
   await donation.save();
 
   return {
@@ -103,6 +109,7 @@ export async function startPayment({ donation, gatewayKey, req }) {
       reference,
       amount: payment.amount,
       currency: payment.currency,
+      instrument: instrument || "",
       checkoutUrl: result.checkoutUrl || "",
       instructions: result.instructions || null,
       expiresAt,
@@ -128,6 +135,7 @@ export const retry = asyncHandler(async (req, res) => {
   const { checkout } = await startPayment({
     donation,
     gatewayKey: req.body?.gateway || previous.gateway,
+    instrument: req.body?.instrument || previous.requestedInstrument,
     req,
   });
 
@@ -314,7 +322,14 @@ export const mockCheckout = asyncHandler(async (req, res) => {
   if (gateway.mode !== "mock") throw ApiError.forbidden("The mock checkout is disabled in this mode");
 
   const donation = await Donation.findById(payment.donation);
-  const cb = `${config.apiPrefix}/payments/callback/${gateway.key}?merchantTxnId=${encodeURIComponent(payment.reference)}&gatewayTxnId=MOCK-${encodeURIComponent(payment.reference)}`;
+  const chosen = String(req.query.instrument || payment.requestedInstrument || "card");
+  const label = { card: "Card", "mobile-banking": "Mobile Banking", "internet-banking": "Internet Banking", wallet: "Mobile Wallet" }[chosen] || "Card";
+  const fakeInstrument = chosen === "card" ? "VISA ****4242" : label;
+  const cb =
+    `${config.apiPrefix}/payments/callback/${gateway.key}` +
+    `?merchantTxnId=${encodeURIComponent(payment.reference)}` +
+    `&gatewayTxnId=MOCK-${encodeURIComponent(payment.reference)}` +
+    `&instrument=${encodeURIComponent(fakeInstrument)}`;
   const amount = formatMoney(payment.amount, payment.currency);
 
   res.type("html").send(`<!doctype html>
@@ -344,6 +359,7 @@ export const mockCheckout = asyncHandler(async (req, res) => {
     <dt>Amount</dt><dd>${escapeHtml(amount)}</dd>
     <dt>Campaign</dt><dd>${escapeHtml(donation?.campaignTitle || "Donation")}</dd>
     <dt>Donor</dt><dd>${escapeHtml(donation?.anonymous ? "Anonymous" : donation?.donor || "-")}</dd>
+    <dt>Method</dt><dd>${escapeHtml(label)}</dd>
     <dt>Reference</dt><dd>${escapeHtml(payment.reference)}</dd>
   </dl>
   <a class="btn ok"     href="${cb}&status=SUCCESS">Pay ${escapeHtml(amount)}</a>
@@ -363,6 +379,18 @@ function redirectToClient(res, { status, ...rest }) {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
   });
   return res.redirect(302, url.toString());
+}
+
+/** Human-readable label stored on the donation, e.g. "Global IME · Card". */
+function describeMethod(gateway, instrument) {
+  if (gateway.kind === "offline") return "Bank transfer";
+  const pretty = {
+    card: "Card",
+    "mobile-banking": "Mobile Banking",
+    "internet-banking": "Internet Banking",
+    wallet: "Mobile Wallet",
+  }[instrument];
+  return pretty ? `${gateway.label} · ${pretty}` : gateway.label;
 }
 
 function escapeHtml(value) {

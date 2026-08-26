@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { http } from "@/lib/api";
+import { http, getToken } from "@/lib/api";
 
 /* ------------------------------------------------------------------ *
  * Inbox & fundraising data — contact submissions, donation records,
@@ -153,10 +153,15 @@ export async function markSubmissionRead(id: string, read = true) {
 
 /** Emails the sender and records the reply against the submission. */
 export async function replyToSubmission(id: string, message: string) {
-  const result = await http.post<{ sent?: boolean; skipped?: boolean }>(`/submissions/${id}/reply`, {
-    message,
-  });
-  submissions.set(submissions.get().map((s) => (s.id === id ? { ...s, replied: true, read: true } : s)));
+  const result = await http.post<{ sent?: boolean; skipped?: boolean }>(
+    `/submissions/${id}/reply`,
+    {
+      message,
+    },
+  );
+  submissions.set(
+    submissions.get().map((s) => (s.id === id ? { ...s, replied: true, read: true } : s)),
+  );
   return result;
 }
 
@@ -173,6 +178,18 @@ export function useDonations() {
 
 export const reloadDonations = donations.reload;
 
+/** One selectable instrument on a gateway's hosted page. */
+export type PaymentInstrument = {
+  key: string;
+  label: string;
+  description: string;
+  icon: "card" | "phone" | "bank" | "wallet";
+  /** Card networks to display; empty for non-card instruments. */
+  brands: string[];
+  /** Usable by a donor paying from outside Nepal. */
+  international: boolean;
+};
+
 export type PaymentGateway = {
   key: string;
   label: string;
@@ -181,8 +198,80 @@ export type PaymentGateway = {
   kind: "redirect" | "offline";
   mode: string;
   currencies: string[];
-  config: Record<string, string | boolean | string[]>;
+  config: {
+    merchantName?: string;
+    international?: boolean;
+    cardBrands?: string[];
+    /** Present on redirect gateways — card first. */
+    methods?: PaymentInstrument[];
+    [k: string]: unknown;
+  };
 };
+
+/**
+ * A single row in the payment-method list.
+ *
+ * Gateways are flattened into their instruments so a donor picks
+ * "Debit / Credit Card" directly, rather than a bank name that only implies
+ * cards are accepted. Every card option still routes through its gateway.
+ */
+export type PayOption = {
+  id: string;
+  gateway: string;
+  gatewayLabel: string;
+  instrument?: string;
+  label: string;
+  description: string;
+  icon: "card" | "phone" | "bank" | "wallet";
+  brands: string[];
+  kind: "redirect" | "offline";
+  mode: string;
+  currencies: string[];
+  international: boolean;
+};
+
+/** Flatten the API's gateway list into the rows the donate form renders. */
+export function toPayOptions(methods: PaymentMethods | null): PayOption[] {
+  if (!methods) return [];
+
+  return methods.gateways.flatMap<PayOption>((g): PayOption[] => {
+    const instruments = g.config.methods ?? [];
+
+    // Offline transfer (and any gateway without an instrument list) is one row.
+    if (!instruments.length) {
+      return [
+        {
+          id: g.key,
+          gateway: g.key,
+          gatewayLabel: g.label,
+          label: g.label,
+          description: g.description,
+          icon: g.kind === "offline" ? ("bank" as const) : ("card" as const),
+          brands: (g.config.cardBrands as string[]) ?? [],
+          kind: g.kind,
+          mode: g.mode,
+          currencies: g.currencies,
+          international: g.config.international !== false,
+        },
+      ];
+    }
+
+    return instruments.map((m) => ({
+      id: `${g.key}:${m.key}`,
+      gateway: g.key,
+      gatewayLabel: g.label,
+      instrument: m.key,
+      label: m.label,
+      description: m.description,
+      icon: m.icon,
+      brands: m.brands,
+      kind: g.kind,
+      mode: g.mode,
+      currencies: g.currencies,
+      international: m.international,
+    }));
+  });
+}
 
 export type PaymentMethods = {
   gateways: PaymentGateway[];
@@ -212,6 +301,8 @@ export type CheckoutSession = {
   reference: string;
   amount: number;
   currency: string;
+  /** Which instrument the donor chose, echoed back. */
+  instrument: string;
   /** Where to send the donor. Empty for offline transfers. */
   checkoutUrl: string;
   instructions: {
@@ -256,6 +347,7 @@ export async function startDonation(input: {
   currency?: string;
   campaignSlug?: string;
   gateway?: string;
+  instrument?: string;
   anonymous?: boolean;
   message?: string;
   dedicateTo?: string;
@@ -284,14 +376,16 @@ export type PaymentStatus = {
 
 /** PUBLIC — poll a payment by its reference (used by the thank-you page). */
 export async function getPaymentStatus(reference: string) {
-  return http.get<PaymentStatus>(`/payments/${encodeURIComponent(reference)}/status`, { auth: false });
+  return http.get<PaymentStatus>(`/payments/${encodeURIComponent(reference)}/status`, {
+    auth: false,
+  });
 }
 
 /** PUBLIC — start a fresh attempt after a failed or cancelled payment. */
-export async function retryPayment(reference: string, gateway?: string) {
+export async function retryPayment(reference: string, gateway?: string, instrument?: string) {
   return http.post<CheckoutSession>(
     `/payments/${encodeURIComponent(reference)}/retry`,
-    gateway ? { gateway } : {},
+    { ...(gateway ? { gateway } : {}), ...(instrument ? { instrument } : {}) },
     { auth: false },
   );
 }
@@ -353,7 +447,13 @@ export type DonationStats = {
   byGateway: { gateway: string; total: number; count: number }[];
   byCurrency: { currency: string; total: number; count: number }[];
   monthly: { month: string; total: number; count: number }[];
-  recent: { donor: string; amount: number; currency: string; campaignTitle: string; date: string }[];
+  recent: {
+    donor: string;
+    amount: number;
+    currency: string;
+    campaignTitle: string;
+    date: string;
+  }[];
 };
 
 export async function getDonationStats() {
@@ -362,10 +462,12 @@ export async function getDonationStats() {
 
 /** Admin — re-verify unfinished payments with the bank. */
 export async function reconcilePayments() {
-  const summary = await http.post<{ checked: number; settled: number; stillPending: number; errors: number }>(
-    "/payments/reconcile",
-    {},
-  );
+  const summary = await http.post<{
+    checked: number;
+    settled: number;
+    stillPending: number;
+    errors: number;
+  }>("/payments/reconcile", {});
   await donations.reload();
   return summary;
 }
@@ -377,8 +479,8 @@ export async function reconcilePayments() {
  * bearer token; the blob is handed to the browser as a file.
  */
 export async function exportDonationsCsv(params: Record<string, string> = {}) {
-  const { getToken } = await import("@/lib/api");
-  const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5000/api/v1";
+  const base =
+    (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5000/api/v1";
   const qs = new URLSearchParams(params).toString();
   const token = getToken();
 
@@ -420,7 +522,10 @@ export async function getNewsletterStats() {
 
 /** Copy every active subscriber address to the clipboard, comma separated. */
 export async function copySubscriberEmails() {
-  const list = subscribers.get().filter((s) => s.active).map((s) => s.email);
+  const list = subscribers
+    .get()
+    .filter((s) => s.active)
+    .map((s) => s.email);
   await navigator.clipboard.writeText(list.join(", "));
   return list.length;
 }

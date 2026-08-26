@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const WHATSAPP_NUMBER = "9779800000000"; // update with the foundation's real number
+const WHATSAPP_NUMBER = "9779868948425";
 const PRESET_MESSAGE = "Namaste! I'd like to learn more about Nirmala Foundation Nepal.";
 
 export function WhatsAppButton() {

@@ -42,6 +42,7 @@ export const createPublic = asyncHandler(async (req, res) => {
     currency,
     campaignSlug,
     gateway: gatewayKey,
+    instrument,
     anonymous,
     message,
     dedicateTo,
@@ -89,7 +90,7 @@ export const createPublic = asyncHandler(async (req, res) => {
     status: "pending",
   });
 
-  const { checkout } = await startPayment({ donation, gatewayKey: gateway.key, req });
+  const { checkout } = await startPayment({ donation, gatewayKey: gateway.key, instrument, req });
 
   logger.info(
     `[donation] started ${checkout.reference} ${formatMoney(money.amount, money.currency)} via ${gateway.key}`,

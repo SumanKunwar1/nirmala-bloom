@@ -35,6 +35,49 @@ const FIELD_MAP = {
   signature: "signature",
 };
 
+/**
+ * Instruments the bank's hosted page can open on.
+ *
+ * Each becomes its own choice on the donate form, so a donor sees
+ * "Debit / Credit Card" rather than having to guess that a bank's name
+ * implies card acceptance. All of them route to the same gateway; we just
+ * pass `preferredInstrument` so the hosted page lands on the right tab.
+ */
+const INSTRUMENTS = {
+  card: {
+    key: "card",
+    label: "Debit / Credit Card",
+    description: "Visa, Mastercard, Amex and UnionPay — issued anywhere in the world.",
+    icon: "card",
+    showsBrands: true,
+    international: true,
+  },
+  "mobile-banking": {
+    key: "mobile-banking",
+    label: "Mobile Banking",
+    description: "Pay from your Nepali bank's mobile app.",
+    icon: "phone",
+    showsBrands: false,
+    international: false,
+  },
+  "internet-banking": {
+    key: "internet-banking",
+    label: "Internet Banking",
+    description: "Log in to your Nepali bank account to authorise the payment.",
+    icon: "bank",
+    showsBrands: false,
+    international: false,
+  },
+  wallet: {
+    key: "wallet",
+    label: "Mobile Wallet",
+    description: "eSewa, Khalti and other connected wallets.",
+    icon: "wallet",
+    showsBrands: false,
+    international: false,
+  },
+};
+
 /** Bank status string -> our Payment.status. */
 function parseStatus(raw) {
   const s = String(raw || "").toUpperCase();
@@ -119,19 +162,41 @@ const gateway = {
 
   /** Public, non-secret info for the donate form. */
   publicConfig() {
+    // Card first — it is the only instrument an overseas donor can use, and
+    // the one most donors are looking for.
+    const ordered = [...gi.instruments].sort(
+      (a, b) => (a === "card" ? -1 : 0) - (b === "card" ? -1 : 0),
+    );
+
     return {
       merchantName: gi.merchantName,
       mode: gi.mode,
       currencies: gi.currencies,
-      international: true,
+      /** Cards issued outside Nepal — depends on your acquiring agreement. */
+      international: gi.international,
+      cardBrands: gi.cardBrands,
+      methods: ordered
+        .map((key) => INSTRUMENTS[key])
+        .filter(Boolean)
+        .map((m) => ({
+          ...m,
+          // A domestic-only agreement means the card option is Nepal-only too.
+          international: m.international && gi.international,
+          brands: m.showsBrands ? gi.cardBrands : [],
+        })),
     };
+  },
+
+  /** Is `instrument` one this gateway actually offers? */
+  supportsInstrument(instrument) {
+    return !instrument || gi.instruments.includes(String(instrument).toLowerCase());
   },
 
   /**
    * Create a checkout session. Returns the URL to redirect the donor to.
    * In mock mode this points at our own simulated checkout page.
    */
-  async initiate({ payment, donation, returnUrl, cancelUrl, webhookUrl }) {
+  async initiate({ payment, donation, returnUrl, cancelUrl, webhookUrl, instrument }) {
     const signature = sign([gi.merchantId, payment.reference, payment.amount, payment.currency]);
 
     const requestPayload = {
@@ -151,12 +216,15 @@ const gateway = {
       returnUrl,
       cancelUrl,
       webhookUrl,
+      // Opens the hosted page directly on the tab the donor picked.
+      preferredInstrument: instrument || "",
       [FIELD_MAP.signature]: signature,
     };
 
     if (gi.mode === "mock") {
       // No outbound call — hand back the local simulator.
-      const checkoutUrl = `${config.payments.publicUrl}${config.apiPrefix}/payments/mock/${payment.reference}`;
+      const query = instrument ? `?instrument=${encodeURIComponent(instrument)}` : "";
+      const checkoutUrl = `${config.payments.publicUrl}${config.apiPrefix}/payments/mock/${payment.reference}${query}`;
       logger.warn(`[globalime] MOCK checkout for ${payment.reference} -> ${checkoutUrl}`);
       return {
         status: "pending",

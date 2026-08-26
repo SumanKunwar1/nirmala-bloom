@@ -134,6 +134,27 @@ const config = {
         .split(",")
         .map((s) => s.trim().toUpperCase())
         .filter(Boolean),
+
+      /**
+       * Whether your merchant agreement covers cards issued OUTSIDE Nepal.
+       * Set GLOBALIME_INTERNATIONAL=false if Global IME has only enabled
+       * domestic acquiring — the donate form then stops advertising overseas
+       * cards and offers bank transfer to foreign donors instead.
+       */
+      international: process.env.GLOBALIME_INTERNATIONAL !== "false",
+
+      /** Card networks the acquirer settles. Shown as logos on the donate form. */
+      cardBrands: (process.env.GLOBALIME_CARD_BRANDS || "visa,mastercard,amex,unionpay")
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean),
+
+      /** Payment instruments offered on the bank's hosted page. */
+      instruments: (process.env.GLOBALIME_INSTRUMENTS || "card,mobile-banking,internet-banking,wallet")
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean),
+
       timeoutMs: parseInt(process.env.GLOBALIME_TIMEOUT_MS || "20000", 10),
     },
 

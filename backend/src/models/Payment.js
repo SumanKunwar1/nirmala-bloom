@@ -49,7 +49,10 @@ const schema = new mongoose.Schema(
     failureCode: { type: String, default: "" },
     failureReason: { type: String, default: "" },
 
-    /** Bank-reported instrument, e.g. "VISA ****4242" / "Mobile Banking". */
+    /** What the donor chose on our form — "card", "mobile-banking", … */
+    requestedInstrument: { type: String, default: "" },
+
+    /** What the bank actually reported back, e.g. "VISA ****4242". */
     instrument: { type: String, default: "" },
 
     signature: { type: String, default: "" },

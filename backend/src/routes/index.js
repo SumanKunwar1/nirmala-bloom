@@ -37,9 +37,9 @@ router.use("/team", crudRouter(TeamMember));
 router.use("/milestones", crudRouter(Milestone));
 
 // Content sections
-router.use("/stories", crudRouter(Story, { hasSlug: true }));
+router.use("/stories", crudRouter(Story, { hasSlug: true, hasCategories: true }));
 router.use("/involve-ways", crudRouter(InvolveWay));
-router.use("/resources", crudRouter(Resource));
+router.use("/resources", crudRouter(Resource, { hasCategories: true }));
 router.use("/gallery-albums", crudRouter(GalleryAlbum, { hasSlug: true }));
 router.use("/partners", crudRouter(Partner));
 

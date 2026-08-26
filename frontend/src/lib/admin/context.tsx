@@ -104,7 +104,13 @@ export type AdminProgram = Stamped & {
   seoKeywords: string;
 };
 
-export type TeamMember = Stamped & { id: string; name: string; role: string; bio: string; photo: string };
+export type TeamMember = Stamped & {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  photo: string;
+};
 
 export type Milestone = Stamped & { id: string; year: string; title: string; desc: string };
 
@@ -121,7 +127,13 @@ export type Story = Stamped & {
   published: boolean;
 };
 
-export type InvolveWay = Stamped & { id: string; icon: string; title: string; text: string; cta: string };
+export type InvolveWay = Stamped & {
+  id: string;
+  icon: string;
+  title: string;
+  text: string;
+  cta: string;
+};
 
 export type AboutContent = {
   heroTitle: string;
@@ -370,7 +382,8 @@ function defaultContent(): HomeContent {
       ],
       mission:
         "To empower people with disabilities in Nepal through inclusive sports, arts, education, and mobility.",
-      vision: "A Nepal where every person — regardless of ability — belongs, contributes, and thrives.",
+      vision:
+        "A Nepal where every person — regardless of ability — belongs, contributes, and thrives.",
       values: "Dignity, accessibility, joy, community, and unwavering advocacy.",
     },
     team: seedTeam.map((t, i) => ({ id: uid(), ...t, photo: teamPhotos[i % teamPhotos.length] })),
@@ -388,16 +401,40 @@ function defaultContent(): HomeContent {
       published: true,
     })),
     getInvolved: [
-      { id: uid(), icon: "🙌", title: "Volunteer", text: "Give your time at camps, tournaments, and tutoring circles across the Kathmandu Valley.", cta: "Become a volunteer" },
-      { id: uid(), icon: "🤝", title: "Partner with us", text: "Organisations and schools can co-design inclusive programmes and share resources.", cta: "Start a partnership" },
-      { id: uid(), icon: "💛", title: "Donate", text: "Fund wheelchairs, equipment, school supplies, and rural health camps.", cta: "Make a donation" },
-      { id: uid(), icon: "📣", title: "Fundraise", text: "Run a campaign among friends, family, or colleagues to support our work.", cta: "Start fundraising" },
+      {
+        id: uid(),
+        icon: "🙌",
+        title: "Volunteer",
+        text: "Give your time at camps, tournaments, and tutoring circles across the Kathmandu Valley.",
+        cta: "Become a volunteer",
+      },
+      {
+        id: uid(),
+        icon: "🤝",
+        title: "Partner with us",
+        text: "Organisations and schools can co-design inclusive programmes and share resources.",
+        cta: "Start a partnership",
+      },
+      {
+        id: uid(),
+        icon: "💛",
+        title: "Donate",
+        text: "Fund wheelchairs, equipment, school supplies, and rural health camps.",
+        cta: "Make a donation",
+      },
+      {
+        id: uid(),
+        icon: "📣",
+        title: "Fundraise",
+        text: "Run a campaign among friends, family, or colleagues to support our work.",
+        cta: "Start fundraising",
+      },
     ],
     contactInfo: {
       address: "Kathmandu, Nepal",
-      phone: "+977 9800000000",
+      phone: "+977 986-8948425",
       email: "info@nirmalafoundation.org.np",
-      whatsapp: "9779800000000",
+      whatsapp: "9779868948425",
       hours: "Sun–Fri, 10:00 AM – 5:00 PM",
       mapEmbed:
         "https://www.openstreetmap.org/export/embed.html?bbox=85.30%2C27.69%2C85.34%2C27.72&layer=mapnik",
@@ -503,6 +540,13 @@ type AuthCtx = {
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 };
+
+/**
+ * The one thing every orderable collection item is guaranteed to have.
+ * Enough for the generic add/update/remove/reorder helpers below, which do
+ * not care about the rest of a record's shape.
+ */
+type Identified = { id: string };
 
 /** Frontend content-collection key → backend REST resource path. */
 const ENDPOINTS: Record<ArrayContentKey, string> = {
@@ -610,23 +654,36 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const fetchAll = useCallback(async () => {
     const q = "?limit=500&sort=order";
     const opt = { auth: false } as const;
-    const [settings, hero, impact, testi, progs, team, miles, stories, involve, resc, albums, prtnrs, camps] =
-      await Promise.all([
-        http.get<Record<string, any>>("/settings", opt).catch(() => null),
-        http.get<any[]>(`/hero-slides${q}`, opt).catch(() => null),
-        http.get<any[]>(`/impact-stats${q}`, opt).catch(() => null),
-        http.get<any[]>(`/testimonials${q}`, opt).catch(() => null),
-        http.get<any[]>(`/programs${q}`, opt).catch(() => null),
-        http.get<any[]>(`/team${q}`, opt).catch(() => null),
-        http.get<any[]>(`/milestones${q}`, opt).catch(() => null),
-        http.get<any[]>(`/stories${q}`, opt).catch(() => null),
-        http.get<any[]>(`/involve-ways${q}`, opt).catch(() => null),
-        http.get<any[]>(`/resources${q}`, opt).catch(() => null),
-        http.get<any[]>(`/gallery-albums${q}`, opt).catch(() => null),
-        http.get<any[]>(`/partners${q}`, opt).catch(() => null),
-        // Sent WITH auth so a signed-in admin also receives unpublished drafts.
-        http.get<any[]>("/campaigns?all=true&limit=200&sort=order").catch(() => null),
-      ]);
+    const [
+      settings,
+      hero,
+      impact,
+      testi,
+      progs,
+      team,
+      miles,
+      stories,
+      involve,
+      resc,
+      albums,
+      prtnrs,
+      camps,
+    ] = await Promise.all([
+      http.get<Record<string, unknown>>("/settings", opt).catch(() => null),
+      http.get<HeroSlide[]>(`/hero-slides${q}`, opt).catch(() => null),
+      http.get<ImpactStat[]>(`/impact-stats${q}`, opt).catch(() => null),
+      http.get<Testimonial[]>(`/testimonials${q}`, opt).catch(() => null),
+      http.get<AdminProgram[]>(`/programs${q}`, opt).catch(() => null),
+      http.get<TeamMember[]>(`/team${q}`, opt).catch(() => null),
+      http.get<Milestone[]>(`/milestones${q}`, opt).catch(() => null),
+      http.get<Story[]>(`/stories${q}`, opt).catch(() => null),
+      http.get<InvolveWay[]>(`/involve-ways${q}`, opt).catch(() => null),
+      http.get<Resource[]>(`/resources${q}`, opt).catch(() => null),
+      http.get<GalleryAlbum[]>(`/gallery-albums${q}`, opt).catch(() => null),
+      http.get<PartnerItem[]>(`/partners${q}`, opt).catch(() => null),
+      // Sent WITH auth so a signed-in admin also receives unpublished drafts.
+      http.get<Campaign[]>("/campaigns?all=true&limit=200&sort=order").catch(() => null),
+    ]);
     setContent((c) => ({
       ...c,
       heroSlides: hero ?? c.heroSlides,
@@ -695,16 +752,19 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const contentValue = useMemo<ContentCtx>(() => {
     const addTo = async (key: ArrayContentKey, item: unknown) => {
       try {
-        const doc = await http.post<any>(`/${ENDPOINTS[key]}`, item);
-        setContent((c) => ({ ...c, [key]: [...(c[key] as any[]), doc] }));
+        const doc = await http.post<Identified>(`/${ENDPOINTS[key]}`, item);
+        setContent((c) => ({ ...c, [key]: [...(c[key] as Identified[]), doc] }));
       } catch (e) {
         console.error(`add ${key}`, e);
       }
     };
     const updateIn = async (key: ArrayContentKey, id: string, patch: unknown) => {
       try {
-        const doc = await http.patch<any>(`/${ENDPOINTS[key]}/${id}`, patch);
-        setContent((c) => ({ ...c, [key]: (c[key] as any[]).map((it) => (it.id === id ? doc : it)) }));
+        const doc = await http.patch<Identified>(`/${ENDPOINTS[key]}/${id}`, patch);
+        setContent((c) => ({
+          ...c,
+          [key]: (c[key] as Identified[]).map((it) => (it.id === id ? doc : it)),
+        }));
       } catch (e) {
         console.error(`update ${key}`, e);
       }
@@ -712,7 +772,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const removeFrom = async (key: ArrayContentKey, id: string) => {
       try {
         await http.delete(`/${ENDPOINTS[key]}/${id}`);
-        setContent((c) => ({ ...c, [key]: (c[key] as any[]).filter((it) => it.id !== id) }));
+        setContent((c) => ({
+          ...c,
+          [key]: (c[key] as Identified[]).filter((it) => it.id !== id),
+        }));
       } catch (e) {
         console.error(`remove ${key}`, e);
       }
@@ -721,7 +784,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const saveSetting = (backendKey: string, field: keyof HomeContent) => {
       clearTimeout(settingTimers.current[backendKey]);
       settingTimers.current[backendKey] = setTimeout(() => {
-        http.put(`/settings/${backendKey}`, contentRef.current[field]).catch((e) => console.error("save setting", e));
+        http
+          .put(`/settings/${backendKey}`, contentRef.current[field])
+          .catch((e) => console.error("save setting", e));
       }, 500);
     };
 
@@ -790,14 +855,16 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         }
       },
       move: (collection, id, dir) => {
-        const arr = [...(contentRef.current[collection] as any[])];
+        const arr = [...(contentRef.current[collection] as Identified[])];
         const i = arr.findIndex((it) => it.id === id);
         const j = i + dir;
         if (i < 0 || j < 0 || j >= arr.length) return;
         [arr[i], arr[j]] = [arr[j], arr[i]];
         setContent((c) => ({ ...c, [collection]: arr }));
         http
-          .patch(`/${ENDPOINTS[collection]}/reorder`, { items: arr.map((it, idx) => ({ id: it.id, order: idx })) })
+          .patch(`/${ENDPOINTS[collection]}/reorder`, {
+            items: arr.map((it, idx) => ({ id: it.id, order: idx })),
+          })
           .catch((e) => console.error("reorder", e));
       },
       resetAll: () => {
