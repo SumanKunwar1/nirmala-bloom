@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, ArrowRight, Landmark, ShieldCheck } from "lucide-react";
+import { Heart, Landmark, ShieldCheck } from "lucide-react";
 import { imgs } from "@/lib/images";
+import { DonateButton } from "@/components/shared/DonateButton";
 
 const amounts = [500, 1000, 5000, 10000];
 
@@ -79,10 +80,10 @@ export function DonateCtaSection() {
                   <span className="font-semibold text-ink">Rs. {amount.toLocaleString()}</span> can
                   fund {impactFor[amount]}.
                 </p>
-                <Link to="/donate" className="btn-pill btn-accent btn-lg w-full mt-5">
-                  <Heart className="h-4 w-4" fill="currentColor" /> Continue to donate{" "}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                <DonateButton amount={amount} className="w-full mt-5 px-6 py-4 text-base">
+                  <Heart className="h-4 w-4" fill="currentColor" /> Donate Rs.{" "}
+                  {amount.toLocaleString()}
+                </DonateButton>
                 <Link
                   to="/donate"
                   className="mt-4 block text-center text-sm text-text/60 hover:text-ink"

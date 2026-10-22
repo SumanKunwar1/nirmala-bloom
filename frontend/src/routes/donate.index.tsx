@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { PageHero } from "@/components/shared/PageHero";
+import { ArrowRight, ChevronRight, Plus, Repeat, Gift, Building2 } from "lucide-react";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { DonationCampaignCard } from "@/components/shared/DonationCampaignCard";
 import { DonateButton } from "@/components/shared/DonateButton";
-import { ScrollReveal, containerVariants, itemVariants } from "@/components/shared/ScrollReveal";
+import { GivingCard } from "@/components/shared/GivingCard";
+import { ScrollReveal } from "@/components/shared/ScrollReveal";
 import { useContent } from "@/lib/admin/context";
 import { http } from "@/lib/api";
-import { campaignImages, imgs } from "@/lib/images";
+import { campaignImages } from "@/lib/images";
 
 export const Route = createFileRoute("/donate/")({
   head: () => ({
@@ -16,50 +17,52 @@ export const Route = createFileRoute("/donate/")({
       { title: "Donate — Nirmala Foundation Nepal" },
       {
         name: "description",
-        content: "Fund wheelchairs, sports equipment, education and health for Nepalis with disabilities.",
+        content:
+          "Fund wheelchairs, sports equipment, education and health for Nepalis with disabilities.",
       },
     ],
   }),
   component: DonatePage,
 });
 
-const impactPoints = [
-  { amount: "Rs. 500", icon: "🩹", text: "Medicines for one rural patient" },
-  { amount: "Rs. 2,500", icon: "🎒", text: "Stationery & braille kit for a child" },
-  { amount: "Rs. 10,000", icon: "🏀", text: "Training day for a sports squad" },
-  { amount: "Rs. 25,000", icon: "🦽", text: "One fitted manual wheelchair" },
-];
-
-const otherWays = [
+const faqs = [
   {
-    icon: "🔁",
-    title: "Recurring donor",
-    text: "Become a monthly supporter. Predictable funding is the most powerful gift we receive.",
-    cta: "Set up monthly",
+    q: "Is my donation secure?",
+    a: "Yes. Card and wallet details are entered on the payment provider's own secure page — they never pass through or get stored on our site.",
   },
   {
-    icon: "🎁",
-    title: "In-kind giving",
-    text: "Donate equipment, art supplies, computers, or transport. Get in touch to coordinate.",
-    cta: "See needs list",
+    q: "Will I get a receipt?",
+    a: "A receipt is emailed to you as soon as your payment is confirmed. Keep it for your records.",
   },
   {
-    icon: "🤝",
-    title: "Corporate sponsorship",
-    text: "Sponsor a tournament, a camp, or a school year. Co-branded reporting included.",
-    cta: "Partner with us",
+    q: "Can I give monthly?",
+    a: "Yes — choose “Monthly” before you donate. Regular gifts let us plan programmes a season ahead. Get in touch any time to change or stop it.",
+  },
+  {
+    q: "Where does my money go?",
+    a: "Campaign gifts go to that campaign's programme. General Fund gifts go where the need is sharpest that month — from a wheelchair to a travel grant to keeping a camp running.",
+  },
+  {
+    q: "Can I donate from outside Nepal?",
+    a: "Yes. Choose your currency on the next step and we'll show the payment options that work internationally.",
   },
 ];
 
 type DonorWall = { donors: { name: string; date: string }[]; anonymousCount: number };
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
 function DonatePage() {
   const { campaigns } = useContent();
 
   const live = campaigns.filter((c) => c.published);
-  const featured =
-    live.find((c) => c.featured && c.urgent) ?? live.find((c) => c.urgent) ?? live.find((c) => c.featured) ?? live[0];
   const generalFund = live.find((c) => c.slug === "general-fund");
+  const featured =
+    live.find((c) => c.featured && c.urgent) ??
+    live.find((c) => c.urgent) ??
+    live.find((c) => c.featured) ??
+    live[0];
+  const others = live.filter((c) => c.slug !== featured?.slug);
 
   // Real supporters, newest first. Falls back to an empty wall if unreachable.
   const [wall, setWall] = useState<DonorWall>({ donors: [], anonymousCount: 0 });
@@ -74,262 +77,318 @@ function DonatePage() {
     };
   }, []);
 
-  // Giving tiers are campaign content, so an admin can edit what each buys.
-  const tiers = (featured?.tiers ?? []).slice(0, 4);
-  const points = tiers.length
-    ? tiers.map((t, i) => ({
-        amount: `Rs. ${t.amount.toLocaleString()}`,
-        icon: impactPoints[i % impactPoints.length].icon,
-        text: t.impact,
-      }))
-    : impactPoints;
-
-  if (!featured) return null;
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
     <>
-      <PageHero
-        eyebrow="Donate"
-        title="Every gift becomes belonging."
-        subtitle="Whether Rs. 500 or Rs. 50,000 — your donation funds dignity, mobility and joy for Nepalis with disabilities."
-        breadcrumb="Donate"
-        image={imgs.pageDonate}
-        imageAlt="Funding inclusion in Nepal"
-        stats={[
-          { value: String(live.length), label: "Live campaigns" },
-          { value: "1,200+", label: "Lives touched" },
-          { value: "100%", label: "Goes to programs" },
-        ]}
-      />
+      {/* Hero — the quickest way to give sits right here */}
+      <section className="pt-[74px]">
+        <div className="shell pt-10 md:pt-14 pb-20 md:pb-28">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-8 md:mb-12 flex items-center gap-1.5 text-sm text-text/55"
+          >
+            <Link to="/" className="hover:text-ink transition-colors">
+              Home
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5 opacity-60" />
+            <span className="text-ink/80">Donate</span>
+          </nav>
+
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease }}
+              className="lg:col-span-7 lg:pt-6"
+            >
+              <div className="eyebrow mb-5">Donate</div>
+              <h1 className="display-1">
+                Every gift becomes <span className="serif-em">belonging.</span>
+              </h1>
+              <p className="mt-6 text-lg md:text-xl leading-relaxed text-text/75 max-w-xl">
+                Whether Rs 500 or Rs 50,000 — your donation funds dignity, mobility and joy for
+                Nepalis with disabilities.
+              </p>
+
+              <dl className="mt-10 grid grid-cols-3 gap-4 max-w-lg border-t border-ink/15 pt-6">
+                {[
+                  { value: String(live.length), label: "Live campaigns" },
+                  { value: "1,200+", label: "Lives touched" },
+                  { value: "100%", label: "Goes to programmes" },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <dt className="sr-only">{s.label}</dt>
+                    <dd className="font-display text-3xl md:text-4xl text-ink leading-none">
+                      {s.value}
+                    </dd>
+                    <dd className="mt-2 text-xs text-text/55">{s.label}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <a
+                href="#campaigns"
+                className="group mt-10 inline-flex items-center gap-2 font-semibold text-ink"
+              >
+                <span className="link-draw">Or choose a specific campaign</span>
+                <ArrowRight className="h-4 w-4 rotate-90 transition-transform group-hover:translate-y-0.5" />
+              </a>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease }}
+              className="lg:col-span-5"
+            >
+              <GivingCard
+                campaign={generalFund}
+                title="Give where it's needed most"
+                subtitle="Your gift goes to the General Fund — we put it to work wherever the need is sharpest this month."
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
 
       {/* Featured campaign */}
-      <section className="py-20 shell">
-        <ScrollReveal>
-          <div className="relative rounded-[2rem] overflow-hidden soft-shadow-lg border border-border bg-white">
-            <div className="grid lg:grid-cols-2">
-              <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[460px] overflow-hidden">
-                <img
-                  src={featured.image || campaignImages[featured.slug]}
-                  alt={featured.title}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover ken-burns"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: `linear-gradient(120deg, ${featured.color}22 0%, transparent 60%, ${featured.color}55 110%)`,
-                  }}
-                />
-                {featured.urgent && (
-                  <span className="absolute top-6 left-6 inline-flex items-center gap-2 rounded-full bg-accent text-white text-xs font-semibold uppercase tracking-wider px-4 py-2 shadow-lg">
-                    <span className="relative flex w-2 h-2">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-75 animate-ping" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-                    </span>
-                    Urgent appeal
-                  </span>
-                )}
-              </div>
-              <div className="p-8 md:p-12 flex flex-col justify-center">
-                <div className="text-xs font-semibold uppercase tracking-[0.22em] text-accent mb-3">
-                  Featured Campaign
+      {featured && (
+        <section className="pb-20 md:pb-28">
+          <div className="shell">
+            <ScrollReveal>
+              <div className="grid lg:grid-cols-12 rounded-[2rem] overflow-hidden bg-plum text-white">
+                <div className="lg:col-span-6 relative aspect-[4/3] lg:aspect-auto lg:min-h-[520px]">
+                  <img
+                    src={featured.image || campaignImages[featured.slug]}
+                    alt={featured.title}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                 </div>
-                <h2 className="font-display text-3xl md:text-4xl font-semibold text-ink leading-tight">
-                  {featured.title}
-                </h2>
-                <p className="mt-4 text-text/75 leading-relaxed">{featured.longDesc}</p>
+                <div className="lg:col-span-6 p-8 md:p-14 flex flex-col justify-center">
+                  <div className="flex flex-wrap items-center gap-3 mb-5">
+                    <span className="eyebrow !text-accent-light">
+                      {featured.urgent ? "Urgent appeal" : "Featured campaign"}
+                    </span>
+                  </div>
+                  <h2 className="display-2 !text-white">{featured.title}</h2>
+                  <p className="mt-5 text-white/70 leading-relaxed text-lg">{featured.desc}</p>
 
-                <div className="mt-7">
-                  <div className="flex items-baseline justify-between text-sm mb-2">
-                    <span className="font-mono-stat font-bold text-ink text-lg">
-                      Rs. {featured.raised.toLocaleString()}
-                    </span>
-                    <span className="text-text/60 text-xs">
-                      raised of Rs. {featured.goal.toLocaleString()}
-                    </span>
+                  <div className="mt-8">
+                    <div className="flex items-end justify-between gap-4">
+                      <div>
+                        <div className="font-display text-3xl leading-none">
+                          Rs {featured.raised.toLocaleString()}
+                        </div>
+                        <div className="mt-1.5 text-sm text-white/55">
+                          raised of Rs {featured.goal.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="text-right text-sm text-white/55">
+                        <span className="font-semibold text-white">{featured.percent}%</span> ·{" "}
+                        {featured.donors} donors
+                      </div>
+                    </div>
+                    <div className="mt-4 h-2 rounded-full bg-white/10 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${Math.min(100, featured.percent)}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.4, ease }}
+                        className="h-full rounded-full bg-accent"
+                      />
+                    </div>
                   </div>
-                  <div className="h-2.5 bg-primary-pale rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${featured.percent}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.4, ease: "easeOut" }}
-                      className="h-full rounded-full"
-                      style={{ background: `linear-gradient(90deg, ${featured.color}, #D9732B)` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-text/55 mt-2">
-                    <span>
-                      <strong className="text-ink">{featured.donors}</strong> donors
-                    </span>
-                    <span>
-                      <strong className="text-ink">{featured.percent}%</strong> funded
-                    </span>
-                  </div>
-                </div>
 
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <DonateButton campaign={featured} variant="primary" className="px-7 py-3.5">
-                    Donate now <span aria-hidden>→</span>
-                  </DonateButton>
-                  <Link
-                    to="/donate/$slug"
-                    params={{ slug: featured.slug }}
-                    className="inline-flex items-center gap-2 border-2 border-primary/20 text-primary rounded-full px-7 py-3.5 font-semibold hover:bg-primary-pale transition-colors"
-                  >
-                    Learn more
-                  </Link>
+                  <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
+                    <DonateButton campaign={featured} className="px-7 py-3.5">
+                      Donate to this campaign
+                    </DonateButton>
+                    <Link
+                      to="/donate/$slug"
+                      params={{ slug: featured.slug }}
+                      className="group inline-flex items-center gap-2 font-semibold text-white"
+                    >
+                      <span className="link-draw">Read the story</span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
-        </ScrollReveal>
-      </section>
+        </section>
+      )}
 
       {/* All campaigns */}
-      <section className="pt-4 pb-20 shell">
-        <SectionHeading
-          eyebrow="Active Campaigns"
-          title="Where your donation goes"
-          subtitle="Pick a campaign that resonates — or contribute to the general fund and we'll route where the need is greatest."
-        />
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.1 }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {live.map((c) => (
-            <motion.div key={c.id} variants={itemVariants}>
-              <DonationCampaignCard campaign={c} />
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
+      {others.length > 0 && (
+        <section id="campaigns" className="scroll-mt-28 py-24 md:py-28 bg-sand">
+          <div className="shell">
+            <SectionHeading
+              align="left"
+              eyebrow="Active campaigns"
+              title={
+                <>
+                  Choose where <span className="serif-em">your gift goes.</span>
+                </>
+              }
+              subtitle="Each campaign funds one part of our work. Open any of them to read the full story."
+            />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {others.map((c, i) => (
+                <ScrollReveal key={c.id} delay={(i % 3) * 0.06} className="h-full">
+                  <DonationCampaignCard campaign={c} />
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* Impact strip */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 aurora-soft" />
-        <div className="relative shell">
+      {/* Other ways to give */}
+      <section className="py-24 md:py-28">
+        <div className="shell">
           <SectionHeading
-            eyebrow="Your Impact"
-            title="What every rupee unlocks"
-            subtitle="Roughly what each tier of giving funds, across our programmes."
-            align="center"
+            align="left"
+            eyebrow="Other ways to give"
+            title={
+              <>
+                Beyond a <span className="serif-em">one-off gift.</span>
+              </>
+            }
           />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
-            {points.map((p, i) => (
-              <ScrollReveal key={`${p.amount}-${i}`} delay={i * 0.08}>
-                <div className="rounded-3xl bg-white border border-border p-6 soft-shadow hover:soft-shadow-lg transition-shadow h-full">
-                  <div className="w-14 h-14 rounded-2xl grid place-items-center text-2xl bg-gradient-to-br from-primary-pale to-accent-light mb-4">
-                    {p.icon}
-                  </div>
-                  <div className="font-mono-stat font-bold text-2xl text-primary">{p.amount}</div>
-                  <div className="text-text/75 text-sm leading-relaxed mt-1">{p.text}</div>
-                </div>
-              </ScrollReveal>
-            ))}
+          <div className="grid md:grid-cols-3 border-t border-ink/15">
+            <ScrollReveal className="py-10 md:pr-10">
+              <Repeat className="h-6 w-6 text-primary" />
+              <h3 className="mt-6 font-display text-2xl">Give monthly</h3>
+              <p className="mt-3 text-text/70 leading-relaxed">
+                Predictable funding is the most powerful gift we receive — it lets us plan a season
+                ahead.
+              </p>
+              <DonateButton
+                campaign={generalFund}
+                recurring
+                variant="outline"
+                className="mt-6 px-5 py-2.5 text-sm"
+              >
+                Start monthly giving
+              </DonateButton>
+            </ScrollReveal>
+            <ScrollReveal
+              delay={0.06}
+              className="py-10 md:px-10 border-t md:border-t-0 md:border-l border-ink/15"
+            >
+              <Gift className="h-6 w-6 text-primary" />
+              <h3 className="mt-6 font-display text-2xl">Give in kind</h3>
+              <p className="mt-3 text-text/70 leading-relaxed">
+                Equipment, art supplies, computers or transport. Get in touch and we&apos;ll share
+                our needs list.
+              </p>
+              <Link
+                to="/contact"
+                className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink"
+              >
+                <span className="link-draw">Contact us</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </ScrollReveal>
+            <ScrollReveal
+              delay={0.12}
+              className="py-10 md:pl-10 border-t md:border-t-0 md:border-l border-ink/15"
+            >
+              <Building2 className="h-6 w-6 text-primary" />
+              <h3 className="mt-6 font-display text-2xl">Corporate sponsorship</h3>
+              <p className="mt-3 text-text/70 leading-relaxed">
+                Sponsor a tournament, a camp or a school year — with co-branded reporting.
+              </p>
+              <Link
+                to="/partners"
+                className="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink"
+              >
+                <span className="link-draw">Partner with us</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* General Fund highlight */}
-      <section className="py-20 bg-white">
-        <div className="mx-auto max-w-5xl px-6">
-          <ScrollReveal>
-            <div className="relative rounded-[2rem] overflow-hidden soft-shadow-lg p-10 sm:p-14 text-center aurora-soft">
-              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">Quick Donation</div>
-              <h2 className="font-display text-3xl md:text-4xl font-semibold text-ink leading-tight mt-2">
-                Don&apos;t want to pick? Give to the General Fund.
-              </h2>
-              <p className="mt-4 text-text/75 leading-relaxed max-w-2xl mx-auto">
-                Unrestricted gifts are the most powerful donation an NGO can receive. We allocate them where the
-                need is sharpest each month — sometimes a wheelchair, sometimes rent, sometimes a sudden travel
-                grant for a national tournament.
-              </p>
-              <ul className="mt-7 grid sm:grid-cols-2 gap-2 max-w-xl mx-auto text-left text-sm text-text/80">
-                {[
-                  "Funds rapid response and emergencies",
-                  "Covers programme overhead and staff",
-                  "Bridges restricted-grant gaps",
-                  "Reported quarterly to all donors",
-                ].map((b) => (
-                  <li key={b} className="flex items-start gap-3">
-                    <span className="mt-0.5 w-5 h-5 shrink-0 rounded-full bg-green-light grid place-items-center text-green text-xs">
-                      ✓
-                    </span>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8">
-                <DonateButton
-                  campaign={generalFund}
-                  variant="primary"
-                  className="px-8 py-4 text-base"
-                >
-                  Give to the General Fund →
-                </DonateButton>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* Other ways to give */}
-      <section className="py-20 bg-gradient-to-b from-white to-primary-pale/30">
-        <div className="shell">
-          <SectionHeading eyebrow="Other Ways to Give" title="Beyond one-off donations" align="center" />
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            {otherWays.map((w, i) => (
-              <ScrollReveal key={w.title} delay={i * 0.08}>
-                <div className="h-full rounded-3xl bg-white border border-border p-7 soft-shadow hover:soft-shadow-lg transition-shadow">
-                  <div className="w-14 h-14 rounded-2xl grid place-items-center text-2xl bg-gradient-to-br from-primary-pale to-accent-light mb-4">
-                    {w.icon}
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-ink">{w.title}</h3>
-                  <p className="text-text/75 text-sm mt-2 leading-relaxed">{w.text}</p>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center gap-1 mt-5 text-primary font-medium text-sm hover:gap-2 transition-all"
+      {/* FAQ */}
+      <section className="py-24 md:py-28 border-t border-border">
+        <div className="shell grid lg:grid-cols-12 gap-10 lg:gap-16">
+          <div className="lg:col-span-4">
+            <div className="eyebrow mb-5">Questions</div>
+            <h2 className="display-3">Before you give.</h2>
+            <p className="mt-4 text-text/70 leading-relaxed">
+              Something else on your mind?{" "}
+              <Link to="/contact" className="font-semibold text-ink underline underline-offset-4">
+                Ask us directly
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="lg:col-span-8 border-t border-ink/15">
+            {faqs.map((f, i) => {
+              const isOpen = openFaq === i;
+              return (
+                <div key={f.q} className="border-b border-ink/15">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    className="flex w-full items-center justify-between gap-6 py-6 text-left"
                   >
-                    {w.cta} <span aria-hidden>→</span>
-                  </Link>
+                    <span className="font-display text-xl md:text-2xl text-ink">{f.q}</span>
+                    <Plus
+                      className={`h-5 w-5 shrink-0 text-ink/50 transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
+                    />
+                  </button>
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-300 ${
+                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="pb-6 max-w-2xl text-text/70 leading-relaxed">{f.a}</p>
+                    </div>
+                  </div>
                 </div>
-              </ScrollReveal>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Donor wall */}
-      <section className="py-20 bg-primary-pale/30">
-        <div className="mx-auto max-w-5xl px-6">
-          <SectionHeading eyebrow="Thank You" title="Our generous donors" align="center" />
-          <div className="flex flex-wrap justify-center gap-3 mt-10">
+      <section className="py-24 md:py-28 bg-sand">
+        <div className="shell max-w-4xl text-center">
+          <div className="eyebrow no-rule mb-5">Thank you</div>
+          <h2 className="display-2">Our generous donors.</h2>
+          <div className="flex flex-wrap justify-center gap-2.5 mt-10">
             {wall.anonymousCount > 0 && (
-              <span className="bg-white border border-border text-primary rounded-full px-5 py-2 text-sm font-medium">
+              <span className="rounded-full bg-background border border-border px-5 py-2 text-sm text-ink">
                 Anonymous · {wall.anonymousCount} donor{wall.anonymousCount === 1 ? "" : "s"}
               </span>
             )}
             {wall.donors.map((d) => (
               <span
                 key={d.name}
-                className="bg-white border border-border text-primary rounded-full px-5 py-2 text-sm font-medium hover:soft-shadow transition-shadow"
+                className="rounded-full bg-background border border-border px-5 py-2 text-sm text-ink"
               >
                 {d.name}
               </span>
             ))}
             {wall.donors.length === 0 && wall.anonymousCount === 0 && (
-              <p className="text-text/60 text-sm">
-                Be the first name on this wall — every gift is acknowledged here unless you ask us not to.
+              <p className="text-text/60">
+                Be the first name on this wall — every gift is acknowledged here unless you ask us
+                not to.
               </p>
             )}
           </div>
-          <p className="text-center text-text/60 text-sm mt-8">
+          <p className="text-text/60 text-sm mt-8">
             Want your name added — or kept anonymous?{" "}
-            <Link to="/contact" className="text-primary underline underline-offset-4">
+            <Link to="/contact" className="text-ink underline underline-offset-4">
               Let us know
             </Link>
             .

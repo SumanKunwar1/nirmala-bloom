@@ -43,7 +43,7 @@ export const imgs = {
   programAdaptiveSports: U("1593113598332-cd288d649433", 1000),
   programInclusiveArts: U("1452860606245-08befc0ff44b", 1000),
   programEducation: U("1497486751825-1233686d5d80", 1000),
-  programMobilityAccess: U("1559757175-5700dde675bc", 1000),
+  programMobilityAccess: U("1597764690523-15bea4c581c9", 1000),
   programHealthWellness: U("1576091160550-2173dba999ef", 1000),
   programCommunityTravel: U("1488521787991-ed7bbaae773c", 1000),
 
@@ -108,7 +108,7 @@ export const programGallery: Record<string, string[]> = {
     U("1427504494785-3a9ca7044f45", 700),
   ],
   "mobility-access": [
-    U("1559757175-5700dde675bc", 700),
+    U("1597764690523-15bea4c581c9", 700),
     U("1576765608535-5f04d1e3f289", 700),
     U("1584515933487-779824d29309", 700),
     U("1519494026892-80bbd2d6fd0d", 700),
@@ -154,7 +154,7 @@ export const partnerImages: Record<string, string> = {
 };
 
 export const campaignImages: Record<string, string> = {
-  "wheelchair-fund": U("1559757175-5700dde675bc", 1100),
+  "wheelchair-fund": U("1597764690523-15bea4c581c9", 1100),
   "school-supplies": U("1497486751825-1233686d5d80", 1100),
   "sports-equipment": U("1542810634-71277d95dcbb", 1100),
   "art-music-materials": U("1513475382585-d06e58bcb0e0", 1100),

@@ -39,10 +39,16 @@ export function DonationModal({
   open,
   onClose,
   campaign,
+  initialAmount,
+  initialRecurring,
 }: {
   open: boolean;
   onClose: () => void;
   campaign?: Campaign;
+  /** Pre-selected gift in NPR, e.g. from an amount picker on the page. */
+  initialAmount?: number;
+  /** Open with "Monthly" already chosen. */
+  initialRecurring?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -78,6 +84,9 @@ export function DonationModal({
   const picked = campaign ?? givable.find((c) => c.slug === slug) ?? givable[0];
   const info = currencyInfo(currency);
   const scrollRef = useRef<HTMLDivElement>(null);
+  /** An amount the page already picked is in NPR — keep NPR rather than guess. */
+  const presetAmount = useRef(initialAmount);
+  presetAmount.current = initialAmount;
 
   /* Load accepted currencies + gateways, then guess the donor's currency. */
   useEffect(() => {
@@ -88,7 +97,9 @@ export function DonationModal({
         if (!alive) return;
         setMethods(m);
         setCurrency((c) =>
-          c !== "NPR" ? c : guessCurrency(m.supportedCurrencies, m.baseCurrency),
+          c !== "NPR" || presetAmount.current
+            ? c
+            : guessCurrency(m.supportedCurrencies, m.baseCurrency),
         );
       })
       .catch(
@@ -98,6 +109,13 @@ export function DonationModal({
       alive = false;
     };
   }, [open]);
+
+  /* Apply the amount / frequency the page picked, each time the modal opens. */
+  useEffect(() => {
+    if (!open) return;
+    if (initialAmount) setAmount(initialAmount);
+    if (initialRecurring !== undefined) setRecurring(initialRecurring);
+  }, [open, initialAmount, initialRecurring]);
 
   /* Keep the amount sensible when the currency changes. */
   const prevCurrency = useRef(currency);
