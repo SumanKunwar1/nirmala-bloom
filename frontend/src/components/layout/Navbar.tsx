@@ -18,6 +18,8 @@ type MenuGroup = {
 };
 
 const ease = [0.22, 1, 0.36, 1] as const;
+/** How long a hovered dropdown stays open after the pointer leaves it. */
+const HOVER_CLOSE_MS = 350;
 
 export function Navbar() {
   const { programs, settings, contactInfo } = useContent();
@@ -75,6 +77,26 @@ export function Navbar() {
   /** Pointer type of the press that led to the current click. A mouse has
    *  already opened the panel on hover, so its click must not toggle it shut. */
   const pressPointer = useRef<string | null>(null);
+  /**
+   * Pending hover-close. Leaving a trigger only closes its panel after a short
+   * grace period, so the pointer can cross the gap between the button and the
+   * panel (or overshoot an edge) without the menu vanishing.
+   */
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  }, []);
+  const scheduleClose = useCallback(
+    (label: string) => {
+      cancelClose();
+      closeTimer.current = setTimeout(() => {
+        setOpenGroup((g) => (g === label ? null : g));
+      }, HOVER_CLOSE_MS);
+    },
+    [cancelClose],
+  );
+  useEffect(() => cancelClose, [cancelClose]);
   const { location } = useRouterState();
 
   useEffect(() => {
@@ -85,10 +107,11 @@ export function Navbar() {
   }, []);
 
   const closeMenus = useCallback(() => {
+    cancelClose();
     setOpen(false);
     setOpenGroup(null);
     setMobileGroup(null);
-  }, []);
+  }, [cancelClose]);
 
   /**
    * Dismiss on navigation. Route changes also fire when only the search or
@@ -216,12 +239,12 @@ export function Navbar() {
                   // browser emulates enter/leave around a tap, which would
                   // open the panel and then let the click toggle it shut.
                   onPointerEnter={(e) => {
-                    if (e.pointerType === "mouse") setOpenGroup(group.label);
+                    if (e.pointerType !== "mouse") return;
+                    cancelClose();
+                    setOpenGroup(group.label);
                   }}
                   onPointerLeave={(e) => {
-                    if (e.pointerType === "mouse") {
-                      setOpenGroup((g) => (g === group.label ? null : g));
-                    }
+                    if (e.pointerType === "mouse") scheduleClose(group.label);
                   }}
                 >
                   <button
