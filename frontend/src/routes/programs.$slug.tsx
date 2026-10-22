@@ -249,7 +249,11 @@ function ProgramDetail() {
             ))}
           </div>
           <div className="hidden md:block shrink-0">
-            <Link to="/donate/$slug" params={{ slug: donateSlug }} className="btn-pill btn-dark btn-sm">
+            <Link
+              to="/donate/$slug"
+              params={{ slug: donateSlug }}
+              className="btn-pill btn-dark btn-sm"
+            >
               <Heart className="h-3.5 w-3.5" fill="currentColor" /> Donate
             </Link>
           </div>
@@ -389,25 +393,44 @@ function ProgramDetail() {
               <p className="text-text/60">{gallery.length} photos · tap to enlarge</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[160px] md:auto-rows-[220px] gap-3 md:gap-4">
-              {gallery.map((src, j) => (
-                <button
-                  key={src + j}
-                  type="button"
-                  onClick={() => setLightbox(j)}
-                  aria-label={`Open photo ${j + 1} of ${gallery.length}`}
-                  className={`group relative overflow-hidden rounded-2xl bg-sand ${gallerySpan(j, gallery.length)}`}
-                >
-                  <img
-                    src={src}
-                    alt=""
-                    loading="lazy"
-                    className="zoom-img absolute inset-0 h-full w-full object-cover"
-                  />
-                  <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-ink opacity-0 transition-opacity group-hover:opacity-100">
-                    <Expand className="h-4 w-4" />
-                  </span>
-                </button>
-              ))}
+              {gallery.slice(0, GALLERY_TILES).map((src, j, shown) => {
+                // The last tile stands in for every photo that didn't fit.
+                const hidden = j === GALLERY_TILES - 1 ? gallery.length - GALLERY_TILES : 0;
+                return (
+                  <button
+                    key={src + j}
+                    type="button"
+                    onClick={() => setLightbox(j)}
+                    aria-label={
+                      hidden > 0
+                        ? `View all ${gallery.length} photos`
+                        : `Open photo ${j + 1} of ${gallery.length}`
+                    }
+                    className={`group relative overflow-hidden rounded-2xl bg-sand ${gallerySpan(j, shown.length)}`}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      className="zoom-img absolute inset-0 h-full w-full object-cover"
+                    />
+                    {hidden > 0 ? (
+                      <span className="absolute inset-0 grid place-items-center bg-plum/60 text-white transition-colors group-hover:bg-plum/70">
+                        <span className="text-center">
+                          <span className="block font-display text-4xl md:text-5xl leading-none">
+                            +{hidden}
+                          </span>
+                          <span className="mt-2 block text-sm text-white/80">more photos</span>
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-ink opacity-0 transition-opacity group-hover:opacity-100">
+                        <Expand className="h-4 w-4" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -584,26 +607,23 @@ function ProgramDetail() {
   );
 }
 
+/** Photos shown in the gallery grid; the rest sit behind a "+N" tile. */
+const GALLERY_TILES = 5;
+
 /**
- * Tile sizes for the gallery mosaic so every row fills: the first photo is a
- * 2×2 feature, then the remaining photos widen just enough to close each row
- * (4 columns on desktop, 2 on mobile).
+ * Tile sizes for the gallery mosaic (at most GALLERY_TILES photos) so every
+ * row fills: the first photo is a 2×2 feature and the others share the two
+ * rows beside it (4 columns on desktop, 2 on mobile).
  */
 function gallerySpan(j: number, n: number) {
   if (j === 0) return "col-span-2 row-span-2";
   const classes: string[] = [];
   // Mobile: photos 1..n-1 sit in pairs; an odd one out goes full width.
   if ((n - 1) % 2 === 1 && j === n - 1) classes.push("col-span-2");
-  // Desktop: photos 1–3 complete the two rows beside the feature (3 is wide).
-  if (j === 3) classes.push("md:col-span-2");
-  if (j >= 4) {
-    const rest = n - 4;
-    const last = j === n - 1;
-    const secondLast = j === n - 2;
-    if (rest % 4 === 1 && last) classes.push("md:col-span-4");
-    if (rest % 4 === 2 && (last || secondLast)) classes.push("md:col-span-2");
-    if (rest % 4 === 3 && last) classes.push("md:col-span-2");
-  }
+  // Desktop: widen tiles so the 2×2 block beside the feature is always full.
+  if (n === 2) classes.push("md:col-span-2 md:row-span-2");
+  if (n === 3) classes.push("md:col-span-2");
+  if (n === 4 && j === 3) classes.push("md:col-span-2");
   return classes.join(" ");
 }
 
