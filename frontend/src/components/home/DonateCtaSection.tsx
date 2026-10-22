@@ -1,103 +1,97 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { Heart, ArrowRight, Landmark } from "lucide-react";
+import { Heart, ArrowRight, Landmark, ShieldCheck } from "lucide-react";
 import { imgs } from "@/lib/images";
 
 const amounts = [500, 1000, 5000, 10000];
 
 const impactFor: Record<number, string> = {
-  500: "stationery for a child",
-  1000: "a day of physiotherapy",
-  5000: "a basketball squad's training session",
-  10000: "medicines for a rural camp",
+  500: "stationery for a child for a term",
+  1000: "a day of fitting and physiotherapy",
+  5000: "a training session for a 10-athlete squad",
+  10000: "medicines for a rural health camp",
 };
 
 export function DonateCtaSection() {
-  const [amount, setAmount] = useState<number | "custom">(1000);
+  const [amount, setAmount] = useState<number>(1000);
 
   return (
-    <section className="relative py-24 md:py-28 overflow-hidden">
-      <div className="absolute inset-0">
-        <img src={imgs.heroJoy} alt="" aria-hidden className="h-full w-full object-cover" />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(120deg, rgba(39,27,51,0.94) 0%, rgba(91,44,134,0.88) 52%, rgba(217,115,43,0.55) 100%)",
-          }}
-        />
-      </div>
+    <section className="py-16 md:py-24">
+      <div className="px-3 md:px-5">
+        <div className="relative overflow-hidden rounded-[1.75rem] md:rounded-[2.5rem] bg-plum">
+          <img
+            src={imgs.heroJoy}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover opacity-45"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-plum via-plum/85 to-plum/30" />
 
-      <div className="relative mx-auto max-w-3xl px-6 text-center text-white">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/20 px-4 py-1.5 eyebrow text-accent-light mb-6"
-        >
-          <Heart className="h-3.5 w-3.5" /> Every rupee becomes belonging
-        </motion.div>
+          <div className="shell relative py-16 md:py-24 grid lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6 text-white">
+              <div className="eyebrow !text-accent-light mb-6">Make a gift</div>
+              <h2 className="display-2 !text-white">
+                Give today. <span className="serif-em on-dark">Change a life.</span>
+              </h2>
+              <p className="mt-6 text-lg text-white/75 max-w-lg leading-relaxed">
+                Your gift funds wheelchairs, sports gear, art supplies and education for Nepali
+                youth with disabilities. It takes under a minute.
+              </p>
+              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/70">
+                <li className="inline-flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-accent" /> Secure, encrypted checkout
+                </li>
+                <li className="inline-flex items-center gap-2">
+                  <Landmark className="h-4 w-4 text-accent" /> Bank transfer available
+                </li>
+              </ul>
+            </div>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.05 }}
-          className="font-display text-4xl md:text-5xl font-extrabold"
-          style={{ color: "#fff" }}
-        >
-          Give today. Change a life.
-        </motion.h2>
-        <p className="mt-4 text-lg text-white/85 max-w-xl mx-auto">
-          Choose an amount and donate in under a minute. Your gift funds wheelchairs, sports gear,
-          art supplies and education for Nepali youth with disabilities.
-        </p>
-
-        {/* Simple amount picker */}
-        <div className="mt-9 flex flex-wrap justify-center gap-3">
-          {amounts.map((a) => (
-            <button
-              key={a}
-              onClick={() => setAmount(a)}
-              aria-pressed={amount === a}
-              className={`rounded-full px-6 py-3 font-mono-stat font-semibold border-2 transition-colors ${
-                amount === a ? "bg-white text-primary border-white" : "border-white/45 text-white hover:bg-white/10"
-              }`}
-            >
-              Rs. {a.toLocaleString()}
-            </button>
-          ))}
-          <button
-            onClick={() => setAmount("custom")}
-            aria-pressed={amount === "custom"}
-            className={`rounded-full px-6 py-3 font-semibold border-2 transition-colors ${
-              amount === "custom" ? "bg-white text-primary border-white" : "border-white/45 text-white hover:bg-white/10"
-            }`}
-          >
-            Other
-          </button>
-        </div>
-
-        {typeof amount === "number" && (
-          <p className="mt-4 text-sm text-white/75">
-            Rs. {amount.toLocaleString()} can fund <span className="text-white font-semibold">{impactFor[amount]}</span>.
-          </p>
-        )}
-
-        <div className="mt-9 flex flex-col items-center gap-4">
-          <Link to="/donate" className="group btn-pill btn-accent !px-10 !py-5 text-sm">
-            <Heart className="h-5 w-5" />
-            Donate via eSewa / Khalti
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-          <Link
-            to="/donate"
-            className="inline-flex items-center gap-2 text-sm text-white/85 underline-offset-4 hover:underline"
-          >
-            <Landmark className="h-4 w-4" /> Bank transfer details
-          </Link>
+            <div className="lg:col-span-5 lg:col-start-8">
+              <div className="rounded-[1.75rem] bg-white p-6 md:p-8 soft-shadow-lg">
+                <div className="text-sm font-semibold text-ink">Choose an amount</div>
+                <div
+                  className="mt-4 grid grid-cols-2 gap-2.5"
+                  role="radiogroup"
+                  aria-label="Donation amount"
+                >
+                  {amounts.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      role="radio"
+                      aria-checked={amount === a}
+                      onClick={() => setAmount(a)}
+                      className={`rounded-xl border px-4 py-3.5 text-left transition-colors ${
+                        amount === a
+                          ? "border-primary bg-primary-pale text-primary"
+                          : "border-border text-ink hover:border-ink/30"
+                      }`}
+                    >
+                      <span className="block text-xs text-text/55">NPR</span>
+                      <span className="block font-display text-2xl leading-tight">
+                        {a.toLocaleString()}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-5 rounded-xl bg-sand px-4 py-3 text-sm text-text/75">
+                  <span className="font-semibold text-ink">Rs. {amount.toLocaleString()}</span> can
+                  fund {impactFor[amount]}.
+                </p>
+                <Link to="/donate" className="btn-pill btn-accent btn-lg w-full mt-5">
+                  <Heart className="h-4 w-4" fill="currentColor" /> Continue to donate{" "}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/donate"
+                  className="mt-4 block text-center text-sm text-text/60 hover:text-ink"
+                >
+                  Prefer another amount or a specific programme?
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

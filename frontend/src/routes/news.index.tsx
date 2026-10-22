@@ -131,7 +131,7 @@ function NewsPage() {
         imageAlt="Field stories from Nirmala Foundation"
       />
 
-      <section className="py-20 mx-auto max-w-7xl px-6">
+      <section className="py-20 shell">
         {/* Filters */}
         <div className="flex flex-wrap gap-2 mb-10">
           <FilterTab

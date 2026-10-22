@@ -76,13 +76,13 @@ function PartnersPage() {
       />
 
       {/* ---------------- LOGO WALL ---------------- */}
-      <section className="py-16 bg-white border-b border-border">
-        <div className="mx-auto max-w-7xl px-6 text-center mb-10">
+      <section className="mt-16 md:mt-20 py-16 bg-white border-y border-border">
+        <div className="shell text-center mb-10">
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-text/55">
             Trusted by partners across Nepal & beyond
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
             {partners.map((p) => (
               <a
@@ -102,7 +102,7 @@ function PartnersPage() {
 
       {/* ---------------- WHY PARTNER ---------------- */}
       <section className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <SectionHeading
             eyebrow="Why Partner With Us"
             title="What partnership looks like."
@@ -127,7 +127,7 @@ function PartnersPage() {
 
       {/* ---------------- FEATURED SPOTLIGHT ---------------- */}
       <section className="pb-16">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <ScrollReveal>
             <div className="relative rounded-[2rem] overflow-hidden soft-shadow-lg border border-border bg-white">
               <div className="grid lg:grid-cols-12">
@@ -208,7 +208,7 @@ function PartnersPage() {
 
       {/* ---------------- DIRECTORY ---------------- */}
       <section className="py-16">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
             <SectionHeading
               eyebrow="Directory"
@@ -257,7 +257,7 @@ function PartnersPage() {
 
       {/* ---------------- PARTNERSHIP TYPES ---------------- */}
       <section className="py-24 bg-gradient-to-b from-white to-primary-pale/30">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <SectionHeading
             eyebrow="Types of Partnership"
             title="Four ways to work together."

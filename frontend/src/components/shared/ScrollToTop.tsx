@@ -29,7 +29,7 @@ export function ScrollToTop({ threshold = 500 }: { threshold?: number }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.6, y: 12 }}
           transition={{ type: "spring", stiffness: 320, damping: 24 }}
-          className="fixed bottom-44 right-6 z-40 grid h-12 w-12 place-items-center rounded-full border border-primary/15 bg-white/90 text-primary backdrop-blur soft-shadow-lg hover:-translate-y-0.5 hover:text-accent transition-transform"
+          className="fixed bottom-24 right-6 z-40 grid h-12 w-12 place-items-center rounded-full border border-primary/15 bg-white/90 text-primary backdrop-blur soft-shadow-lg hover:-translate-y-0.5 hover:text-accent transition-transform"
         >
           <ArrowUp className="h-5 w-5" />
         </motion.button>

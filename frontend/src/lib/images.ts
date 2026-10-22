@@ -56,7 +56,7 @@ export const imgs = {
   newsPress: U("1495020689067-958852a7765e", 1000),
 
   // Gallery albums
-  gallerySports: U("1626284800725-30c4e6cfa39d", 900),
+  gallerySports: U("1504450758481-7338eba7524a", 900),
   galleryArts: U("1513475382585-d06e58bcb0e0", 900),
   galleryRetreat: U("1545389336-cf090694435e", 900),
   galleryFootball: U("1571019613454-1cb2f99b2d8b", 900),
@@ -75,7 +75,7 @@ export const imgs = {
 export const programImages: Record<string, string> = {
   "adaptive-sports": imgs.programAdaptiveSports,
   "inclusive-arts": imgs.programInclusiveArts,
-  "education": imgs.programEducation,
+  education: imgs.programEducation,
   "mobility-access": imgs.programMobilityAccess,
   "health-wellness": imgs.programHealthWellness,
   "community-travel": imgs.programCommunityTravel,
@@ -87,19 +87,19 @@ export const programGallery: Record<string, string[]> = {
     U("1593113598332-cd288d649433", 700),
     U("1542751371-adc38448a05e", 700),
     U("1571019613454-1cb2f99b2d8b", 700),
-    U("1546519638-68e109acd27d", 700),
-    U("1626284800725-30c4e6cfa39d", 700),
+    U("1519861531473-9200262188bf", 700),
+    U("1504450758481-7338eba7524a", 700),
     U("1574623452334-1e0ac2b3ccb4", 700),
   ],
   "inclusive-arts": [
     U("1452860606245-08befc0ff44b", 700),
     U("1513475382585-d06e58bcb0e0", 700),
-    U("1499892477393-f675706cbfac", 700),
+    U("1460661419201-fd4cecdf8a8b", 700),
     U("1560421683-6856ea585c78", 700),
     U("1547891654-e66ed7ebb968", 700),
     U("1541961017774-22349e4a1262", 700),
   ],
-  "education": [
+  education: [
     U("1497486751825-1233686d5d80", 700),
     U("1503676260728-1c00da094a0b", 700),
     U("1509062522246-3755977927d7", 700),
@@ -147,7 +147,7 @@ export const partnerImages: Record<string, string> = {
   "New Futures Nepal": U("1559027615-cd4628902d4a", 900),
   "Bodhisattvas in Action": U("1542178243-bc20204b769f", 900),
   "Utpala Cafe": U("1554118811-1e0d58224f24", 900),
-  "Vidhya Byayam": U("1546519638-68e109acd27d", 900),
+  "Vidhya Byayam": U("1519861531473-9200262188bf", 900),
   "Godawari Botanical Gardens": U("1545389336-cf090694435e", 900),
   "The Himalayan Times": U("1495020689067-958852a7765e", 900),
   "Daraz Nepal": U("1607082348824-0a96f2a4b9da", 900),

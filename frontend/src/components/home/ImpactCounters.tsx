@@ -3,30 +3,40 @@ import { useContent } from "@/lib/admin/context";
 
 export function ImpactCounters() {
   const { impactStats } = useContent();
+  if (impactStats.length === 0) return null;
+
   return (
-    <section className="relative py-20 md:py-24 bg-muted/60 border-y border-border">
-      <div className="relative mx-auto max-w-7xl px-6">
-        <div className="text-center mb-12 max-w-3xl mx-auto">
-          <div className="eyebrow mb-4">Our Impact</div>
-          <h2 className="font-display text-2xl md:text-[2.1rem] md:leading-[1.3] font-bold text-ink">
-            Our community-led model makes sure no one is left behind — and the results speak for
-            themselves.
-          </h2>
+    <section className="py-24 md:py-32">
+      <div className="shell">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-14 items-end mb-14 md:mb-20">
+          <div className="lg:col-span-7">
+            <div className="eyebrow mb-5">Our impact</div>
+            <h2 className="display-2">
+              A community-led model, so <span className="serif-em">no one is left behind.</span>
+            </h2>
+          </div>
+          <p className="lg:col-span-5 text-lg text-text/70 leading-relaxed">
+            We measure success in people reached, schools opened up and partnerships that last — and
+            we publish what we learn so others can build on it.
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-          {impactStats.map((s) => (
+        <dl className="grid grid-cols-2 lg:grid-cols-4 border-t border-ink/15">
+          {impactStats.map((s, i) => (
             <div
-              key={s.label}
-              className="rounded-3xl bg-card border border-border p-7 text-center soft-shadow lift"
+              key={s.id ?? s.label}
+              className={`py-8 md:py-10 pr-4 ${i % 2 === 1 ? "pl-4 md:pl-8 border-l border-ink/15" : ""} ${
+                i > 0 && i % 2 === 0 ? "lg:pl-8 lg:border-l lg:border-ink/15" : ""
+              } ${i >= 2 ? "border-t lg:border-t-0 border-ink/15" : ""}`}
             >
-              <div className="text-4xl md:text-5xl font-bold text-primary font-mono-stat">
-                <AnimatedCounter value={s.value} suffix={s.suffix} />
-              </div>
-              <div className="mt-2 text-xs md:text-sm text-text/65 uppercase tracking-wider">{s.label}</div>
+              <dt className="sr-only">{s.label}</dt>
+              <dd className="display-1 !text-[clamp(2.75rem,6vw,4.75rem)] text-ink">
+                <AnimatedCounter value={s.value} suffix={s.suffix} className="" />
+              </dd>
+              <dd className="mt-3 text-sm md:text-base text-text/65">{s.label}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   );

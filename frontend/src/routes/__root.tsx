@@ -10,20 +10,26 @@ import {
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { FloatingDonateButton } from "@/components/layout/FloatingDonateButton";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { AdminProvider } from "@/lib/admin/context";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-display font-bold text-primary">404</h1>
-        <h2 className="mt-4 text-xl font-semibold">Page not found</h2>
-        <p className="mt-2 text-sm text-text/70">The page you're looking for doesn't exist.</p>
-        <Link to="/" className="inline-block mt-6 bg-accent text-white rounded-full px-6 py-3 font-semibold">
-          Go home
-        </Link>
+    <div className="flex min-h-screen items-center justify-center bg-background px-5 pt-24 pb-16">
+      <div className="max-w-lg text-center">
+        <div className="eyebrow no-rule">Error 404</div>
+        <h1 className="display-2 mt-4">Page not found</h1>
+        <p className="mt-4 text-lg text-text/70">
+          The page you're looking for has moved or doesn't exist. Let's get you somewhere useful.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link to="/" className="btn-pill btn-dark">
+            Go home
+          </Link>
+          <Link to="/programs" className="btn-pill btn-outline">
+            See our work
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -62,10 +68,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Nirmala Foundation Nepal — Breaking Barriers, Building Belonging" },
       {
         name: "description",
-        content: "Empowering people with disabilities through sports, arts, education & mobility in Nepal.",
+        content:
+          "Empowering people with disabilities through sports, arts, education & mobility in Nepal.",
       },
       { property: "og:title", content: "Nirmala Foundation Nepal" },
-      { property: "og:description", content: "Disability inclusion through sports, arts, education and mobility." },
+      {
+        property: "og:description",
+        content: "Disability inclusion through sports, arts, education and mobility.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -87,16 +97,19 @@ function RootComponent() {
       <AdminProvider>
         <HeadContent />
         {isAdmin ? (
-          <Outlet />
+          <div className="admin-ui">
+            <Outlet />
+          </div>
         ) : (
           <>
-            <a href="#main-content" className="skip-link">Skip to content</a>
+            <a href="#main-content" className="skip-link">
+              Skip to content
+            </a>
             <Navbar />
             <main id="main-content" className="min-h-screen">
               <Outlet />
             </main>
             <Footer />
-            <FloatingDonateButton />
             <WhatsAppButton />
           </>
         )}

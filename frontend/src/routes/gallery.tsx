@@ -35,7 +35,7 @@ function GalleryPage() {
         imageAlt="Photos and stories of the Nirmala community"
       />
 
-      <section className="py-20 mx-auto max-w-7xl px-6">
+      <section className="py-20 shell">
         <div className="flex gap-2 mb-10 flex-wrap">
           {(["All", "Photos", "Videos"] as const).map((t) => (
             <button

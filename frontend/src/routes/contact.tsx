@@ -69,7 +69,7 @@ function ContactPage() {
         imageAlt="Connect with the Nirmala Foundation team"
       />
 
-      <section className="py-20 mx-auto max-w-7xl px-6 grid lg:grid-cols-5 gap-10">
+      <section className="py-20 shell grid lg:grid-cols-5 gap-10">
         {sent ? (
           <div className="lg:col-span-3 rounded-3xl bg-white border border-border p-10 soft-shadow flex flex-col items-center justify-center text-center">
             <div className="grid h-16 w-16 place-items-center rounded-full bg-green-light text-green">

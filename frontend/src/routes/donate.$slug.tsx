@@ -80,7 +80,7 @@ function CampaignDetail() {
 
         {/* Top floating back-link */}
         <div className="absolute top-24 inset-x-0 z-10">
-          <div className="mx-auto max-w-7xl px-6">
+          <div className="shell">
             <Link
               to="/donate"
               className="inline-flex items-center gap-2 text-sm text-white/85 hover:text-white bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-2 transition-colors"
@@ -91,7 +91,7 @@ function CampaignDetail() {
         </div>
 
         {/* Bottom-anchored content */}
-        <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-32 w-full grid lg:grid-cols-12 gap-10 items-end">
+        <div className="relative shell pb-16 pt-32 w-full grid lg:grid-cols-12 gap-10 items-end">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -185,7 +185,7 @@ function CampaignDetail() {
         <div
           className="sticky top-20 z-30 backdrop-blur bg-white/85 border-y border-border"
         >
-          <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
+          <div className="shell py-3 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3 min-w-0">
               <span
                 className="w-8 h-8 rounded-full grid place-items-center text-base shrink-0"
@@ -208,7 +208,7 @@ function CampaignDetail() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 py-16 lg:py-20">
+        <div className="shell grid lg:grid-cols-12 gap-12 py-16 lg:py-20">
           <div className="lg:col-span-7 space-y-14">
             <ScrollReveal>
               <SectionMark label="About this campaign" color={c.color} />
@@ -352,7 +352,7 @@ function CampaignDetail() {
 
       {/* ---------------- RELATED ---------------- */}
       <section className="py-20 bg-gradient-to-b from-white to-primary-pale/30">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">More campaigns</div>

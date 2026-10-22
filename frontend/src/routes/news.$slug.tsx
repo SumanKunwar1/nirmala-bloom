@@ -159,7 +159,7 @@ function NewsDetail() {
       </div>
 
       {related.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 mt-20">
+        <section className="shell mt-20">
           <h2 className="font-display text-2xl font-semibold text-ink mb-6">More stories</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {related.map((r, i) => (

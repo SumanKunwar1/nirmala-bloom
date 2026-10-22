@@ -1,41 +1,44 @@
-import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { NewsCard } from "@/components/shared/NewsCard";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { containerVariants, itemVariants } from "@/components/shared/ScrollReveal";
+import { ScrollReveal } from "@/components/shared/ScrollReveal";
 import { useContent } from "@/lib/admin/context";
-
-const COLORS = ["#6B2FA0", "#F97316", "#2D7A4F", "#9B5DD5", "#E11D48", "#0891B2"];
 
 export function NewsPreview() {
   const { stories } = useContent();
   const recent = stories.filter((s) => s.published !== false).slice(0, 3);
+  if (recent.length === 0) return null;
+  const [lead, ...rest] = recent;
+
   return (
-    <section className="py-24 md:py-28 bg-gradient-to-b from-white to-primary-pale/40">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="py-24 md:py-32">
+      <div className="shell">
         <SectionHeading
-          align="center"
-          eyebrow="Latest Stories"
-          title="News from the field"
-          subtitle="Voices, victories, and quiet moments from across our programs."
+          align="left"
+          eyebrow="Latest stories"
+          title={
+            <>
+              News from <span className="serif-em">the field.</span>
+            </>
+          }
+          action={
+            <Link to="/news" className="btn-pill btn-outline">
+              All news <ArrowRight className="h-4 w-4" />
+            </Link>
+          }
         />
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.15 }}
-          className="grid md:grid-cols-3 gap-6"
-        >
-          {recent.map((p, i) => (
-            <motion.div key={p.slug} variants={itemVariants}>
-              <NewsCard {...p} color={COLORS[i % COLORS.length]} />
-            </motion.div>
-          ))}
-        </motion.div>
-        <div className="mt-12 text-center">
-          <Link to="/news" className="btn-pill btn-outline">
-            All News <span aria-hidden>→</span>
-          </Link>
+        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
+          <ScrollReveal className="lg:col-span-7">
+            <NewsCard {...lead} featured />
+          </ScrollReveal>
+          <div className="lg:col-span-5 grid gap-6 lg:gap-8 content-start">
+            {rest.map((p, i) => (
+              <ScrollReveal key={p.slug} delay={0.1 * (i + 1)}>
+                <NewsCard {...p} compact />
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
       </div>
     </section>

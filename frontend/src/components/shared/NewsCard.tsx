@@ -1,7 +1,11 @@
-import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { newsImages } from "@/lib/images";
 
+/**
+ * Story card. `featured` is the large lead card, `compact` a horizontal row
+ * for side lists; the default is a standard grid card.
+ */
 export function NewsCard({
   slug,
   title,
@@ -9,8 +13,9 @@ export function NewsCard({
   date,
   excerpt,
   readTime,
-  color = "#5B2C86",
   image: imageProp,
+  featured = false,
+  compact = false,
 }: {
   slug: string;
   title: string;
@@ -20,50 +25,78 @@ export function NewsCard({
   readTime?: string;
   color?: string;
   image?: string;
+  featured?: boolean;
+  compact?: boolean;
 }) {
   const image = imageProp || newsImages[slug];
+  const meta = (
+    <div className="flex items-center gap-2 text-xs text-text/55">
+      <span className="font-semibold uppercase tracking-[0.14em] text-accent-ink">{category}</span>
+      <span aria-hidden>·</span>
+      <span>{date}</span>
+      {readTime && (
+        <>
+          <span aria-hidden>·</span>
+          <span>{readTime} read</span>
+        </>
+      )}
+    </div>
+  );
+
+  const media = (cls: string) => (
+    <div className={`relative overflow-hidden bg-sand ${cls}`}>
+      {image && (
+        <img
+          src={image}
+          alt=""
+          loading="lazy"
+          className="zoom-img absolute inset-0 w-full h-full object-cover"
+        />
+      )}
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <Link
+        to="/news/$slug"
+        params={{ slug }}
+        className="group grid grid-cols-[8rem_1fr] sm:grid-cols-[11rem_1fr] gap-5 items-center"
+      >
+        {media("aspect-square rounded-2xl")}
+        <article>
+          {meta}
+          <h3 className="mt-2 font-display text-xl leading-snug">
+            <span className="link-draw">{title}</span>
+          </h3>
+          <p className="mt-2 text-sm text-text/65 line-clamp-2 hidden sm:block">{excerpt}</p>
+        </article>
+      </Link>
+    );
+  }
+
   return (
-    <motion.article
-      whileHover={{ y: -6 }}
-      transition={{ type: "tween", duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="group rounded-3xl bg-white border border-border overflow-hidden soft-shadow hover:soft-shadow-lg"
-    >
-      <div className="aspect-[16/10] relative overflow-hidden">
-        {image ? (
-          <img
-            src={image}
-            alt={title}
-            loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1100ms] ease-out group-hover:scale-[1.05]"
-          />
-        ) : (
-          <div
-            className="absolute inset-0 grain"
-            style={{ background: `linear-gradient(135deg, ${color} 0%, #D9732B 100%)` }}
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-        <span className="absolute top-4 left-4 text-[11px] font-semibold uppercase tracking-wider bg-white/95 text-primary px-3 py-1 rounded-full">
-          {category}
-        </span>
-      </div>
-      <div className="p-6">
-        <div className="text-xs text-text/60 mb-2">
-          {date}
-          {readTime && ` · ${readTime} read`}
+    <Link to="/news/$slug" params={{ slug }} className="group block h-full">
+      <article className="h-full flex flex-col">
+        {media(featured ? "aspect-[16/11] rounded-[1.75rem]" : "aspect-[16/10] rounded-[1.5rem]")}
+        <div className="pt-6 flex flex-col flex-1">
+          {meta}
+          <h3
+            className={`mt-3 font-display leading-tight ${featured ? "text-3xl md:text-4xl" : "text-2xl"}`}
+          >
+            <span className="link-draw">{title}</span>
+          </h3>
+          <p
+            className={`mt-3 text-text/70 leading-relaxed ${featured ? "text-lg" : "text-[15px] line-clamp-2"}`}
+          >
+            {excerpt}
+          </p>
+          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
+            Read story{" "}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </span>
         </div>
-        <h3 className="font-display font-semibold text-xl mb-2 leading-snug group-hover:text-primary transition-colors">
-          {title}
-        </h3>
-        <p className="text-text/75 text-sm leading-relaxed mb-4 line-clamp-2">{excerpt}</p>
-        <Link
-          to="/news/$slug"
-          params={{ slug }}
-          className="text-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all"
-        >
-          Read more <span aria-hidden>→</span>
-        </Link>
-      </div>
-    </motion.article>
+      </article>
+    </Link>
   );
 }

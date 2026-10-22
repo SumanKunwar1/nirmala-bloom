@@ -1,93 +1,80 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { Quote, Award, Trophy, Crown, ArrowRight } from "lucide-react";
+import { Award, ArrowRight } from "lucide-react";
 import { imgs } from "@/lib/images";
+import { useContent } from "@/lib/admin/context";
 
-const honours = [
-  { icon: Trophy, label: "National wheelchair basketball player" },
-  { icon: Award, label: "D-30 Disability Impact List, 2025" },
-  { icon: Crown, label: "Miss Disability Queen · UN Women honoree" },
-];
+const ease = [0.22, 1, 0.36, 1] as const;
 
 export function FounderSpotlight() {
+  const { about } = useContent();
+  const honours = about.founderHonours.slice(0, 3);
+
   return (
-    <section className="relative overflow-hidden py-24 md:py-28 aurora-deep grain">
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="eyebrow text-accent-light mb-4">Meet Our Founder</div>
-
-        {/* Full-width hero image of Nirmala */}
+    <section className="py-24 md:py-32">
+      <div className="shell grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="relative photo-frame aspect-[16/10] md:aspect-[16/7]"
-        >
-          <img
-            src={imgs.founderAbout}
-            alt="Nirmala Bhandari, founder of the Nirmala Foundation"
-            className="ken-burns object-top"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/65 via-ink/10 to-transparent" />
-          <div className="absolute bottom-5 left-5 right-5">
-            <h2 className="font-display text-3xl md:text-5xl font-semibold leading-tight" style={{ color: "#fff" }}>
-              Nirmala Bhandari
-            </h2>
-            <div className="text-white/85 text-sm md:text-base mt-1">Founder &amp; Executive Director · Para-athlete</div>
-          </div>
-        </motion.div>
-
-        {/* Description underneath */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="mt-12 grid lg:grid-cols-3 gap-10 lg:gap-14 text-white"
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.9, ease }}
+          className="lg:col-span-6 relative"
         >
-          <div className="lg:col-span-2">
-            <p className="text-lg md:text-xl text-white/85 leading-relaxed">
-              A woman with a disability who turned her own journey — from a Hope Centre resident to a national
-              para-athlete — into a movement. Nirmala founded this organisation so that no Nepali with a disability has
-              to fight alone for the chance to belong.
-            </p>
+          <div className="photo-frame aspect-[4/5] rounded-[2rem]">
+            <img
+              src={about.founderImage || imgs.founderAbout}
+              alt={`${about.founderName}, founder of the Nirmala Foundation`}
+              loading="lazy"
+              className="object-top"
+            />
+          </div>
+          <div className="absolute -bottom-6 right-4 sm:right-8 inline-flex items-center gap-3 rounded-full bg-white pl-2 pr-5 py-2 soft-shadow-lg">
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-accent text-white">
+              <Award className="h-5 w-5" />
+            </span>
+            <span className="text-sm font-semibold text-ink">
+              D-30 Disability Impact List · 2025
+            </span>
+          </div>
+        </motion.div>
 
-            <figure className="mt-8 border-l-4 border-accent pl-6">
-              <Quote className="h-7 w-7 text-accent" />
-              <blockquote
-                className="mt-2 font-display font-semibold text-xl md:text-2xl leading-relaxed"
-                style={{ color: "#fff" }}
-              >
-                We don&apos;t ask for permission to belong. We build belonging — every day, in every community.
-              </blockquote>
-              <figcaption className="mt-3 text-sm text-white/65">
-                Nirmala Bhandari, Founder &amp; Executive Director
-              </figcaption>
-            </figure>
-
-            <Link
-              to="/about"
-              className="group btn-pill mt-9 bg-white text-primary hover:bg-white"
-            >
-              Read Nirmala&apos;s Story
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+        <div className="lg:col-span-6">
+          <div className="eyebrow mb-6">Meet our founder</div>
+          <blockquote className="display-3 !leading-[1.25] text-ink">
+            &ldquo;We don&apos;t ask for permission to belong. We build belonging —{" "}
+            <span className="serif-em">every day, in every community.</span>&rdquo;
+          </blockquote>
+          <div className="mt-8 flex items-center gap-4">
+            <span className="h-px w-10 bg-ink/30" />
+            <div>
+              <div className="font-semibold text-ink">{about.founderName}</div>
+              <div className="text-sm text-text/60">{about.founderRole}</div>
+            </div>
           </div>
 
-          <ul className="space-y-3">
-            {honours.map((h) => (
-              <li
-                key={h.label}
-                className="flex items-center gap-3 rounded-2xl bg-white/10 border border-white/15 px-4 py-3"
-              >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/20 text-accent">
-                  <h.icon className="h-4 w-4" />
-                </span>
-                <span className="text-sm text-white/90 leading-tight">{h.label}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
+          <p className="mt-8 text-lg text-text/75 leading-relaxed">
+            A woman with a disability who turned her own journey — from a Hope Centre resident to a
+            national para-athlete — into a movement, so that no Nepali with a disability has to
+            fight alone for the chance to belong.
+          </p>
+
+          {honours.length > 0 && (
+            <ul className="mt-8 flex flex-wrap gap-2">
+              {honours.map((h) => (
+                <li
+                  key={h}
+                  className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/80"
+                >
+                  {h}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <Link to="/about" className="btn-pill btn-dark mt-10">
+            Read {about.founderName.split(" ")[0]}&apos;s story <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -19,14 +19,14 @@ function Index() {
       <HeroSection />
       <MissionVision />
       <ProgramsGrid />
-      <RightsBand />
       <ImpactCounters />
+      <RightsBand />
       <FounderSpotlight />
       <TestimonialsCarousel />
-      <DonateCtaSection />
       <NewsPreview />
-      <PartnersMarquee />
       <NewsletterStrip />
+      <PartnersMarquee />
+      <DonateCtaSection />
     </>
   );
 }

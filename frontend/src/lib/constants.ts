@@ -5,17 +5,6 @@ export const socialLinks = {
   linkedin: "https://www.linkedin.com/in/nirmalafoundation-6b2697312/",
 } as const;
 
-export const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Programs", href: "/programs" },
-  { label: "News", href: "/news" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Resources", href: "/resources" },
-  { label: "Partners", href: "/partners" },
-  { label: "Contact", href: "/contact" },
-] as const;
-
 export type Program = {
   slug: string;
   title: string;

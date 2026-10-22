@@ -103,7 +103,7 @@ function DonatePage() {
       />
 
       {/* Featured campaign */}
-      <section className="py-20 mx-auto max-w-7xl px-6">
+      <section className="py-20 shell">
         <ScrollReveal>
           <div className="relative rounded-[2rem] overflow-hidden soft-shadow-lg border border-border bg-white">
             <div className="grid lg:grid-cols-2">
@@ -187,7 +187,7 @@ function DonatePage() {
       </section>
 
       {/* All campaigns */}
-      <section className="pt-4 pb-20 mx-auto max-w-7xl px-6">
+      <section className="pt-4 pb-20 shell">
         <SectionHeading
           eyebrow="Active Campaigns"
           title="Where your donation goes"
@@ -211,7 +211,7 @@ function DonatePage() {
       {/* Impact strip */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 aurora-soft" />
-        <div className="relative mx-auto max-w-7xl px-6">
+        <div className="relative shell">
           <SectionHeading
             eyebrow="Your Impact"
             title="What every rupee unlocks"
@@ -279,7 +279,7 @@ function DonatePage() {
 
       {/* Other ways to give */}
       <section className="py-20 bg-gradient-to-b from-white to-primary-pale/30">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="shell">
           <SectionHeading eyebrow="Other Ways to Give" title="Beyond one-off donations" align="center" />
           <div className="grid md:grid-cols-3 gap-6 mt-12">
             {otherWays.map((w, i) => (
