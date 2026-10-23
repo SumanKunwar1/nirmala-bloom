@@ -389,7 +389,7 @@ function ProgramEditor({
                 <TextInput
                   value={draft.seoTitle}
                   onChange={(e) => set("seoTitle", e.target.value)}
-                  placeholder={`${draft.title || "Program"} — Nirmala Foundation Nepal`}
+                  placeholder={`${draft.title || "Program"} | Nirmala Foundation Nepal`}
                 />
               </Field>
               <Field label="Meta description" hint={`${(draft.seoDescription || "").length} characters · ~155 recommended`}>
@@ -418,7 +418,7 @@ function ProgramEditor({
                     nirmalafoundation.org.np › programs › {draft.slug || "slug"}
                   </div>
                   <div className="mt-0.5 truncate text-lg" style={{ color: "#1a0dab" }}>
-                    {draft.seoTitle || `${draft.title || "Program"} — Nirmala Foundation Nepal`}
+                    {draft.seoTitle || `${draft.title || "Program"} | Nirmala Foundation Nepal`}
                   </div>
                   <div className="mt-0.5 line-clamp-2 text-sm text-text/70">
                     {draft.seoDescription || draft.desc || "Add a meta description to control this snippet."}

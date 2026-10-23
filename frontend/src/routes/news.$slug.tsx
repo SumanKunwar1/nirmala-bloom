@@ -6,7 +6,7 @@ import { http, ApiError } from "@/lib/api";
 import { NewsCard } from "@/components/shared/NewsCard";
 
 export const Route = createFileRoute("/news/$slug")({
-  head: () => ({ meta: [{ title: "Story — Nirmala Foundation" }] }),
+  head: () => ({ meta: [{ title: "Story | Nirmala Foundation" }] }),
   component: NewsDetail,
 });
 
@@ -52,7 +52,7 @@ function NewsDetail() {
   }, [slug, cached]);
 
   useEffect(() => {
-    if (post) document.title = `${post.title} — Nirmala Foundation`;
+    if (post) document.title = `${post.title} | Nirmala Foundation`;
   }, [post]);
 
   useEffect(() => {

@@ -12,7 +12,7 @@ const SUBJECTS = ["General Inquiry", "Volunteer", "Partnership", "Press", "Donat
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Nirmala Foundation" },
+      { title: "Contact | Nirmala Foundation" },
       { name: "description", content: "Get in touch with Nirmala Foundation Nepal." },
     ],
   }),

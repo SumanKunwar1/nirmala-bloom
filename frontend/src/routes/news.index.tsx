@@ -26,7 +26,7 @@ export const Route = createFileRoute("/news/")({
   },
   head: () => ({
     meta: [
-      { title: "News & Stories — Nirmala Foundation" },
+      { title: "News & Stories | Nirmala Foundation" },
       {
         name: "description",
         content: "Stories, press, and updates from Nirmala Foundation Nepal.",

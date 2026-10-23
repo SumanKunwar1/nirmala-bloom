@@ -16,7 +16,7 @@ const categoryColors: Record<string, string> = {
 export const Route = createFileRoute("/resources")({
   head: () => ({
     meta: [
-      { title: "Resource Centre — Nirmala Foundation" },
+      { title: "Resource Centre | Nirmala Foundation" },
       {
         name: "description",
         content: "Reports, research, policy briefs, and guides on disability inclusion in Nepal.",

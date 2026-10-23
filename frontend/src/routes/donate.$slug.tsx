@@ -9,7 +9,7 @@ import { GivingCard } from "@/components/shared/GivingCard";
 import { ScrollReveal } from "@/components/shared/ScrollReveal";
 
 export const Route = createFileRoute("/donate/$slug")({
-  head: () => ({ meta: [{ title: "Donate — Nirmala Foundation Nepal" }] }),
+  head: () => ({ meta: [{ title: "Donate | Nirmala Foundation Nepal" }] }),
   component: CampaignDetail,
   errorComponent: ({ error }) => <div className="p-10">{error.message}</div>,
 });
@@ -26,7 +26,7 @@ function CampaignDetail() {
   // SEO overrides are campaign content, so apply them client-side.
   useEffect(() => {
     if (!c) return;
-    document.title = c.seoTitle || `${c.title} — Donate · Nirmala Foundation`;
+    document.title = c.seoTitle || `${c.title} | Donate | Nirmala Foundation`;
     const meta = document.querySelector('meta[name="description"]');
     if (meta && c.seoDescription) meta.setAttribute("content", c.seoDescription);
   }, [c]);

@@ -11,7 +11,7 @@ import { useContent, type PartnerItem } from "@/lib/admin/context";
 export const Route = createFileRoute("/partners")({
   head: () => ({
     meta: [
-      { title: "Partners — Nirmala Foundation" },
+      { title: "Partners | Nirmala Foundation" },
       {
         name: "description",
         content: "International and national partners advancing disability inclusion in Nepal.",

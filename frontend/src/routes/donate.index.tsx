@@ -14,7 +14,7 @@ import { campaignImages } from "@/lib/images";
 export const Route = createFileRoute("/donate/")({
   head: () => ({
     meta: [
-      { title: "Donate — Nirmala Foundation Nepal" },
+      { title: "Donate | Nirmala Foundation Nepal" },
       {
         name: "description",
         content:

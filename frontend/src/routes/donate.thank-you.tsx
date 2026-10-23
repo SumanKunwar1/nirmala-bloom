@@ -36,7 +36,7 @@ export const Route = createFileRoute("/donate/thank-you")({
     reason: search.reason ? String(search.reason) : undefined,
     cancelled: search.cancelled ? String(search.cancelled) : undefined,
   }),
-  head: () => ({ meta: [{ title: "Thank you — Nirmala Foundation Nepal" }] }),
+  head: () => ({ meta: [{ title: "Thank you | Nirmala Foundation Nepal" }] }),
   component: ThankYouPage,
 });
 

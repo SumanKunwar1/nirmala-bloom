@@ -10,7 +10,7 @@ import { useContent } from "@/lib/admin/context";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — Nirmala Foundation Nepal" },
+      { title: "About | Nirmala Foundation Nepal" },
       {
         name: "description",
         content:

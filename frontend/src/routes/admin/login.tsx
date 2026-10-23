@@ -6,7 +6,7 @@ import { DEMO_EMAIL, DEMO_PASSWORD, useAuth } from "@/lib/admin/context";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({
-    meta: [{ title: "Sign in — Nirmala Admin" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Sign in | Nirmala Admin" }, { name: "robots", content: "noindex" }],
   }),
   component: LoginPage,
 });

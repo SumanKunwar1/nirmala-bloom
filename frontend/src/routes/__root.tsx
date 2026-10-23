@@ -65,7 +65,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
-      { title: "Nirmala Foundation Nepal — Breaking Barriers, Building Belonging" },
+      { title: "Nirmala Foundation Nepal | Breaking Barriers, Building Belonging" },
       {
         name: "description",
         content:

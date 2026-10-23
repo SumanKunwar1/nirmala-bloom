@@ -9,7 +9,7 @@ import { ScrollReveal } from "@/components/shared/ScrollReveal";
 import { useContent, useAuth } from "@/lib/admin/context";
 
 export const Route = createFileRoute("/programs/$slug")({
-  head: () => ({ meta: [{ title: "Program — Nirmala Foundation Nepal" }] }),
+  head: () => ({ meta: [{ title: "Program | Nirmala Foundation Nepal" }] }),
   component: ProgramDetail,
 });
 
@@ -28,7 +28,7 @@ function ProgramDetail() {
 
   // Set the document title client-side (SEO overrides supported).
   useEffect(() => {
-    if (p) document.title = p.seoTitle || `${p.title} — Nirmala Foundation Nepal`;
+    if (p) document.title = p.seoTitle || `${p.title} | Nirmala Foundation Nepal`;
   }, [p]);
 
   // Always open at the top.

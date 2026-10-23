@@ -8,7 +8,7 @@ import { useContent, type GalleryAlbum } from "@/lib/admin/context";
 export const Route = createFileRoute("/gallery")({
   head: () => ({
     meta: [
-      { title: "Gallery — Nirmala Foundation" },
+      { title: "Gallery | Nirmala Foundation" },
       { name: "description", content: "Photos and videos from Nirmala Foundation programs." },
     ],
   }),
