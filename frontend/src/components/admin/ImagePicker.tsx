@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
-import { Upload, Link2, X, ImageOff } from "lucide-react";
+import { Upload, Link2, X, ImageOff, Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
 
 /**
  * Reusable image field that accepts EITHER a local device upload
- * (stored as a base64 data URL — frontend-only) OR a pasted image URL.
+ * (sent to the API, which stores it on Cloudinary and returns its URL)
+ * OR a pasted image URL.
  */
 export function ImagePicker({
   value,
@@ -21,6 +23,7 @@ export function ImagePicker({
   const [mode, setMode] = useState<"upload" | "url">(isData || !value ? "upload" : "url");
   const [drag, setDrag] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const readFile = (file?: File | null) => {
@@ -35,7 +38,20 @@ export function ImagePicker({
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => onChange(String(reader.result));
+    reader.onload = async () => {
+      setUploading(true);
+      try {
+        const { url } = await api<{ url: string }>("/uploads/image", {
+          method: "POST",
+          body: { image: String(reader.result) },
+        });
+        onChange(url);
+      } catch (e) {
+        setErr(e instanceof Error ? `Upload failed: ${e.message}` : "Upload failed.");
+      } finally {
+        setUploading(false);
+      }
+    };
     reader.onerror = () => setErr("Could not read that file.");
     reader.readAsDataURL(file);
   };
@@ -79,6 +95,16 @@ export function ImagePicker({
               Uploaded file
             </span>
           )}
+        </div>
+      ) : mode === "upload" && uploading ? (
+        <div
+          className="grid place-items-center rounded-xl border-2 border-dashed border-primary/40 bg-muted/30 text-center"
+          style={{ aspectRatio: aspect }}
+        >
+          <div>
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+            <p className="mt-3 text-sm font-semibold text-ink">Uploading…</p>
+          </div>
         </div>
       ) : mode === "upload" ? (
         <div

@@ -70,6 +70,14 @@ const config = {
   },
   adminNotifyEmail: process.env.ADMIN_NOTIFY_EMAIL || "",
 
+  // Image uploads from the admin panel. The SDK reads CLOUDINARY_URL
+  // (cloudinary://<api_key>:<api_secret>@<cloud_name>) on its own; without
+  // it the upload endpoint answers 503 instead of failing obscurely.
+  cloudinary: {
+    enabled: Boolean(process.env.CLOUDINARY_URL),
+    folder: process.env.CLOUDINARY_FOLDER || "nirmala",
+  },
+
   /* ------------------------------------------------------------------ *
    * Payments
    *

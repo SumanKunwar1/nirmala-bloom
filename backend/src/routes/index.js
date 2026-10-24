@@ -8,6 +8,7 @@ import settingRoutes from "./setting.routes.js";
 import newsletterRoutes from "./newsletter.routes.js";
 import campaignRoutes from "./campaign.routes.js";
 import paymentRoutes from "./payment.routes.js";
+import uploadRoutes from "./upload.routes.js";
 
 import HeroSlide from "../models/HeroSlide.js";
 import ImpactStat from "../models/ImpactStat.js";
@@ -52,5 +53,8 @@ router.use("/payments", paymentRoutes);
 router.use("/settings", settingRoutes);
 router.use("/submissions", submissionRoutes);
 router.use("/newsletter", newsletterRoutes);
+
+// Admin media
+router.use("/uploads", uploadRoutes);
 
 export default router;
